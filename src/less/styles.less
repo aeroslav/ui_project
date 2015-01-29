@@ -1,0 +1,57 @@
+@import 'normalize.less';
+@import 'vars.less';
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+body {
+    color: @c-text;
+}
+aside {
+    width: @aside-width;
+    height: 100%;
+    padding: 10px;
+    float: left;
+    overflow: auto;
+    background-color: #ccc;
+}
+main {
+    height: 100%;
+    padding: 10px;
+    margin-left: @aside-width;
+    overflow: auto;
+}
+.wrapper {
+    height: 100%;
+}
+.loader {
+    width: 0px;
+    height: 3px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: @c-green;
+    transition: width .2s linear;
+}
+.logo {
+    text-align: center;
+}
+.menu, .toc {
+    padding-right: 1em;
+    text-align: right;
+}
+.articlesList {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5em 2em;
+    box-shadow: 0 10px 10px @c-dark;
+}
+article {
+    margin-bottom: 2em;
+}

@@ -1,0 +1,50 @@
+[
+    {
+        "header": "A Vision for Our Sass",
+        "author": "Felicity Evans",
+        "date": "January 20, 2015",
+        "intro": "<p>At a recent CSS meetup, I asked, “Who uses Sass in their daily workflow?” The response was overwhelmingly positive; no longer reserved for pet projects and experiments, Sass is fast becoming the standard way for writing CSS.</p>",
+        "html": "<p>This is great news! Sass gives us a lot more power over complex, ever-growing stylesheets, including new features like variables, control directives, and mixins that the original CSS spec (intentionally) lacked. Sass is a stylesheet language that’s robust yet flexible enough to keep pace with us.<br>Yet alongside the wide-scale adoption of Sass (which I applaud), I’ve observed a steady decline in the quality of outputted CSS (which I bemoan). It makes sense: Sass introduces a layer of abstraction between the author and the stylesheets. But we need a way to translate the web standards—that we fought so hard for—into this new environment. The problem is, the Sass specification is expanding so much that any set of standards would require constant revision. Instead, what we need is a charter—one that sits outside Sass, yet informs the way we code.<br>To see a way forward, let’s first examine some trouble spots.\n</p>",
+        "tags": ["CSS", "Sass"]
+    },
+    {
+        "header": "Live Font Interpolation on the Web",
+        "author": "Andrew Johnson",
+        "date": "January 20, 2015",
+        "intro": "<p>We all want to design great typographic experiences. We also want to serve users on an increasing range of devices and contexts. But today’s webfonts tie our responsive sites and applications to inflexible type that doesn’t scale. As a result, our users get poor reading experiences and longer loading times from additional font weights.</p>",
+        "html": "<h2>An introduction to font interpolation</h2><br><p>Traditional font interpolation is a process used by type designers to generate new intermediary fonts from a series of master fonts. Master fonts represent key archetypal designs across different points in a font family. By using math to automatically find the in-betweens of these points, type designers can derive additional font variants/weights from interpolation instead of designing each one manually. We can apply the same concept to our webfonts to serve different font variants for our users. For example, the H letter (H glyph) in this proof of concept (currently for desktop browsers) has light and heavy masters in order to interpolate a new font weight.</p>\n",
+        "tags": ["JavaScript", "RWD"]
+    },
+    {
+        "header": "Axiomatic CSS and Lobotomized Owls",
+        "author": "Heydon Pickering",
+        "date": "January 20, 2015",
+        "intro": "<p>At CSS Day last June I introduced, with some trepidation, a peculiar three-character CSS selector. Called the “lobotomized owl selector” for its resemblance to an owl’s vacant stare, it proved to be the most popular section of my talk.</p>",
+        "html": "<p>I couldn’t tell you whether the attendees were applauding the thinking behind the invention or were, instead, nervously laughing at my audacity for including such an odd and seemingly useless construct. Perhaps I was unwittingly speaking to a room full of paid-up owl sanctuary supporters. I don’t know.<br>The lobotomized owl selector looks like this:<br><code>* + *</code><br>Despite its irreverent name and precarious form, the lobotomized owl selector is no mere thought experiment for me. It is the result of ongoing experimentation into automating the layout of flow content. The owl selector is an “axiomatic” selector with a voracious purview. As such, many will be hesitant to use it, and it will terrify some that I include it in production code. I aim to demonstrate how the selector can reduce bloat, speed up development, and help automate the styling of arbitrary, dynamic content.\n</p>",
+        "tags": ["CSS"]
+    },
+    {
+        "header": "Radio-Controlled Web Design",
+        "author": "Art Lawry",
+        "date": "January 20, 2015",
+        "intro": "<p>Interactive user interfaces are a necessity in our responsive world. Smaller screens constrain the amount of content that can be displayed at any given time, so we need techniques to keep navigation and secondary information out of the way until they’re needed. From tabs and modal overlays to hidden navigation, we’ve created many powerful design patterns that show and hide content using JavaScript.</p>",
+        "html": "<p>JavaScript comes with its own mobile challenges, though. Network speeds and data plans vary wildly, and every byte we deliver has an impact on the render speed of our pages or applications. When we add JavaScript to a page, we’re typically adding an external JavaScript file and an optional (usually large) library like jQuery. These interfaces won’t become usable until all the content, JavaScript files included, is downloaded—creating a slow and sluggish first impression for our users.<br>If we could create these content-on-demand patterns with no reliance on JavaScript, our interfaces would render earlier, and users could interact with them as soon as they were visible. By shifting some of the functionality to CSS, we could also reduce the amount of JavaScript needed to render the rest of our page. The result would be smaller file sizes, faster page-load times, interfaces that are available earlier, and the same functionality we’ve come to rely on from these design patterns.<br>In this article, I’ll explore a technique I’ve been working on that does just that. It’s still a bit experimental, so use your best judgment before using it in your own production systems.\n</p>",
+        "tags": ["CSS", "JavaScript"]
+    },
+    {
+        "header": "Planning for Performance",
+        "author": "Felicity Evans",
+        "date": "January 20, 2015",
+        "intro": "<p>Page-load times in the ten-second range are still common on modern mobile networks, and that’s a fraction of how long it takes in countries with older, more limited networks. Why so slow? It’s mostly our fault: our sites are too heavy, and they’re often assembled and delivered in ways that don’t take advantage of how browsers work. According to HTTP Archive, the average website weighs 1.7 megabytes. (It’s probably heftier now, so you may want to look it up.) To make matters worse, most of the sites surveyed on HTTP Archive aren’t even responsive, but focus on one specific use case: the classic desktop computer with a large screen</p>",
+        "html": "<h1>We’re not doing a good job</h1><br><p>That’s awful news for responsive (and, ahem, responsible) designers who aim to support many types of devices with a single codebase, rather than focusing on one type. Truth be told, much of the flak responsive design has taken relates to the ballooning file sizes of responsive sites in the wild, like Oakley’s admittedly gorgeous Airbrake MX site, which originally launched with a whopping 80-megabyte file size (though it was later heavily optimized to be much more responsible), or the media-rich Disney homepage, which serves a 5-megabyte responsive site to any device.<br>Why are some responsive sites so big? Attempting to support every browser and device with a single codebase certainly can have an additive effect on file size—if we don’t take measures to prevent it. Responsive design’s very nature involves delivering code that’s ready to respond to conditions that may or may not occur, and delivering code only when and where it’s needed poses some tricky obstacles given our current tool set.</p>",
+        "tags": ["RWD", "HTML"]
+    },
+    {
+        "header": "A Vision for Our Sass",
+        "author": "Felicity Evans",
+        "date": "January 20, 2015",
+        "intro": "<p>At a recent CSS meetup, I asked, “Who uses Sass in their daily workflow?” The response was overwhelmingly positive; no longer reserved for pet projects and experiments, Sass is fast becoming the standard way for writing CSS.</p>",
+        "html": "<p>This is great news! Sass gives us a lot more power over complex, ever-growing stylesheets, including new features like variables, control directives, and mixins that the original CSS spec (intentionally) lacked. Sass is a stylesheet language that’s robust yet flexible enough to keep pace with us.<br>Yet alongside the wide-scale adoption of Sass (which I applaud), I’ve observed a steady decline in the quality of outputted CSS (which I bemoan). It makes sense: Sass introduces a layer of abstraction between the author and the stylesheets. But we need a way to translate the web standards—that we fought so hard for—into this new environment. The problem is, the Sass specification is expanding so much that any set of standards would require constant revision. Instead, what we need is a charter—one that sits outside Sass, yet informs the way we code.<br>To see a way forward, let’s first examine some trouble spots.\n</p>",
+        "tags": ["CSS", "Sass"]
+    }
+]

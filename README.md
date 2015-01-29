@@ -1,3 +1,5 @@
-# ui_project repo
+# Backbone + RequireJS + Gulp scaffold
 
-for some training
+Simple scaffold for start work with Backbone + RequireJS + Less + Gulp
+
+After clone run install_modules. Then just start gulp.
