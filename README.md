@@ -1,5 +1,3 @@
-# Backbone + RequireJS + Gulp scaffold
+# Backbone + RequireJS app project
 
-Simple scaffold for start work with Backbone + RequireJS + Less + Gulp
-
-After clone run install_modules. Then just start gulp.
+Simple project with Backbone + RequireJS + Less + Gulp
