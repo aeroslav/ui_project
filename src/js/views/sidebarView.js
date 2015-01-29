@@ -6,7 +6,10 @@ define(function(require){
     var tFnSidebar = _.template(tSidebar);
     var SidebarView = Backbone.View.extend({
         initialize: function(opt) {
-            this.sideMenuView = new SideMenuView({ artColl: opt.artColl });
+            this.sideMenuView = new SideMenuView({
+                artColl: opt.artColl,
+                router: opt.router
+            });
             this.render();
         },
         render: function() {

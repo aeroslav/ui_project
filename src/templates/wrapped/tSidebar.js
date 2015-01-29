@@ -1,3 +1,3 @@
 define([], function () {
-  return "<div class=\"logo\">\n    <img src=\"img/logo.png\" alt=\"logo\">\n</div>\n<ul class=\"menu\">menu</ul>\n<div class=\"toc\">toc</div>";
+  return "<div class=\"logo\">\n    <img src=\"img/logo.png\" alt=\"logo\">\n</div>\n<ul class=\"menu\">menu</ul>";
 });

@@ -7,15 +7,16 @@ define(function(require){
             initialize: function(opt) {
                 var sidebarView = new SidebarView({
                         el: $('aside'),
-                        artColl: opt.artColl
+                        artColl: opt.artColl,
+                        router: opt.router
                     }),
                     articlesListView = new ArticlesListView({
                         el: $('main'),
-                        artColl: opt.artColl
+                        artColl: opt.artColl,
+                        router: opt.router
                     });
             }
         });
 
-    console.log('AppView');
     return AppView;
 });

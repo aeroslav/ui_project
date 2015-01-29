@@ -4944,7 +4944,7 @@ define('backbone', [
     return Backbone;
 });
 define('src/templates/wrapped/tSideMenu', [], function () {
-    return '<% _.each(data.menuLinks, function(el){ %>\r\n<li class="menu-item">\r\n    <a href="#/section/<%=el%>" class="menu-link"><%=el%></a>\r\n</li>\r\n<% }); %>';
+    return '<% _.each(data.menuLinks, function(el){ %>\r\n<li class="menu-item">\r\n    <a href="#section=<%=el%>" class="menu-link"><%=el%></a>\r\n</li>\r\n<% }); %>';
 });
 define('views/sideMenuView', [
     'require',
@@ -4959,12 +4959,23 @@ define('views/sideMenuView', [
         initialize: function (opt) {
             this.artColl = opt.artColl;
             this.listenTo(this.artColl, 'cUpdate', this.updateLinks);
+            this.listenTo(opt.router, 'route:section', function (sec) {
+                var menuLinks = $('.menu-link');
+                menuLinks.removeClass('is-current');
+                menuLinks.each(function (i, el) {
+                    if (el.text === sec) {
+                        $(el).addClass('is-current');
+                    }
+                    ;
+                });
+            });
         },
         render: function () {
             this.$el.html(tFnSideMenu({ menuLinks: links }));
         },
         updateLinks: function () {
             links = [];
+            links.push('All');
             _.each(this.artColl.models, function (article) {
                 var tags = article.attributes.tags;
                 _.each(tags, function (tag) {
@@ -4980,7 +4991,7 @@ define('views/sideMenuView', [
     return SideMenuView;
 });
 define('src/templates/wrapped/tSidebar', [], function () {
-    return '<div class="logo">\n    <img src="img/logo.png" alt="logo">\n</div>\n<ul class="menu">menu</ul>\n<div class="toc">toc</div>';
+    return '<div class="logo">\n    <img src="img/logo.png" alt="logo">\n</div>\n<ul class="menu">menu</ul>';
 });
 define('views/sidebarView', [
     'require',
@@ -4994,7 +5005,10 @@ define('views/sidebarView', [
     var tFnSidebar = _.template(tSidebar);
     var SidebarView = Backbone.View.extend({
         initialize: function (opt) {
-            this.sideMenuView = new SideMenuView({ artColl: opt.artColl });
+            this.sideMenuView = new SideMenuView({
+                artColl: opt.artColl,
+                router: opt.router
+            });
             this.render();
         },
         render: function () {
@@ -5038,7 +5052,6 @@ define('collections/articlesCollection', [
             if (_.isObject(opt))
                 this.url = opt.url;
             else {
-                console.log('error fetching ArticlesCollection');
                 return false;
             }
             ;
@@ -5057,7 +5070,7 @@ define('collections/articlesCollection', [
     return ArticlesCollection;
 });
 define('src/templates/wrapped/tArticlesList', [], function () {
-    return '<div class="articlesList">\r\n<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article>\r\n        <h1><a href="#article=<%= el.cid %>" class="articlesList-article"><%= rec.header %></a></h1>\r\n        <p class="intro"><%= rec.intro %></p>\r\n    </article>\r\n<% }) %>\r\n</div>';
+    return '<div class="articlesList">\r\n<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article class="articlesList-article">\r\n        <h2><a href="#article=<%= el.cid %>"><%= rec.header %></a></h2>\r\n        <p class="intro"><%= rec.intro %></p>\r\n    </article>\r\n<% }) %>\r\n</div>';
 });
 define('views/articlesListView', [
     'require',
@@ -5106,14 +5119,15 @@ define('views/appView', [
         initialize: function (opt) {
             var sidebarView = new SidebarView({
                     el: $('aside'),
-                    artColl: opt.artColl
+                    artColl: opt.artColl,
+                    router: opt.router
                 }), articlesListView = new ArticlesListView({
                     el: $('main'),
-                    artColl: opt.artColl
+                    artColl: opt.artColl,
+                    router: opt.router
                 });
         }
     });
-    console.log('AppView');
     return AppView;
 });
 define('router', [
@@ -5130,9 +5144,10 @@ define('router', [
             'section=:section': 'section'
         },
         start: function () {
-            console.log('route #start activated');
+            console.log('router fire start');
         },
         section: function (section) {
+            console.log(section);
         }
     });
     return Router;
@@ -5150,7 +5165,11 @@ define('app', [
     var router = new Router();
     Backbone.history.start();
     var articlesCollection = new ArticlesCollection({ url: '/json/articles.json' });
-    appView = new AppView({ artColl: articlesCollection });
+    appView = new AppView({
+        artColl: articlesCollection,
+        router: router
+    });
+    router.navigate('section=All', { trigger: true });
     console.log('app');
 });
 requirejs.config({

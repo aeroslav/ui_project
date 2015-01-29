@@ -13,13 +13,29 @@ html, body {
 body {
     color: @c-text;
 }
+a {
+    color: @c-green;
+    text-decoration: none;
+    &:focus {
+        outline: none;
+    }
+    &:visited {
+        color: spin(saturate(@c-green, 10%), 15);
+    }
+    &:hover {
+        color: spin(saturate(@c-green, 20%), 20);
+    }
+}
+ul, li {
+    margin: 0;
+    padding: 0;
+}
 aside {
     width: @aside-width;
     height: 100%;
-    padding: 10px;
     float: left;
     overflow: auto;
-    background-color: #ccc;
+    background-color: @c-light;
 }
 main {
     height: 100%;
@@ -40,18 +56,50 @@ main {
     transition: width .2s linear;
 }
 .logo {
+    margin: 2em 0 2em;
     text-align: center;
 }
 .menu, .toc {
-    padding-right: 1em;
+    display: block;
     text-align: right;
+}
+.menu-item {
+    display: block;
+    &:first-of-type .menu-link {
+        border-top: 1px solid @c-grey;
+    }
+}
+.menu-link {
+    display: block;
+    padding: .5em 2em .5em 0;
+    font-size: 0.9em;
+    border-bottom: 1px solid @c-grey;
+    border-right: 0px solid @c-grey;
+    color: @c-dark;
+    transition: all .2s ease-out;
+    &:visited {
+        color: @c-dark;
+    }
+    &:hover {
+        border-right: 10px solid @c-grey;
+        color: @c-dark;
+        background-color: @c-green;
+    }
+    &.is-current {
+        border-right: 10px solid @c-grey;
+        background-color: @c-green;
+    }
 }
 .articlesList {
     max-width: 900px;
     margin: 0 auto;
     padding: 2.5em 2em;
-    box-shadow: 0 10px 10px @c-dark;
+    border: 1px solid @c-light;
+    box-shadow: 0 10px 15px @c-dark;
 }
-article {
+.articlesList-article {
     margin-bottom: 2em;
+    h2 {
+        width: 50%;
+    }
 }

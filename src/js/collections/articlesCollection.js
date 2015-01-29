@@ -7,7 +7,6 @@ define(function(require){
             initialize: function(opt) {
                 if (_.isObject(opt)) this.url = opt.url
                 else {
-                    console.log('error fetching ArticlesCollection');
                     return false;
                 };
                 this.fetch({

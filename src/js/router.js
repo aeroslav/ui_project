@@ -8,10 +8,10 @@ define(function(require){
             'section=:section': 'section'
         },
         start: function () {
-            console.log('route #start activated');
+            console.log('router fire start');
         },
         section: function(section) {
-            
+            console.log(section);
         }
     });
 

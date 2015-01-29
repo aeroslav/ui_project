@@ -9,7 +9,10 @@ define(function(require){
 
     var articlesCollection = new ArticlesCollection({url: '/json/articles.json'});
         appView = new AppView({
-            artColl: articlesCollection
+            artColl: articlesCollection,
+            router: router
         });
+
+    router.navigate('section=All', {trigger: true});
     console.log('app');
 });
