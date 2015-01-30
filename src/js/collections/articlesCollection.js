@@ -4,15 +4,11 @@ define(function(require){
 
     var ArticlesCollection = Backbone.Collection.extend({
             model: ArticleModel,
-            initialize: function(opt) {
-                if (_.isObject(opt)) this.url = opt.url
-                else {
-                    return false;
-                };
+            fetchUrl: function(url) {
+                this.url = url;
                 this.fetch({
                     success: function(coll, res) {
-                        console.log('---fetching---');
-                        coll.trigger('cUpdate')
+                        coll.trigger('success')
                     },
                     error: function(coll, res) {
                         console.log('error fetching ArticlesCollection', res);

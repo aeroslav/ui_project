@@ -3,19 +3,18 @@ define(function(require){
         SideMenuView = require('views/sideMenuView'),
         tSidebar = require('src/templates/wrapped/tSidebar');
 
-    var tFnSidebar = _.template(tSidebar);
     var SidebarView = Backbone.View.extend({
         initialize: function(opt) {
+            this.template = _.template(tSidebar);
             this.sideMenuView = new SideMenuView({
-                artColl: opt.artColl,
+                articlesCollection: opt.articlesCollection,
                 router: opt.router
             });
             this.render();
         },
         render: function() {
-            this.$el.html(tFnSidebar({}));
+            this.$el.html(this.template({}));
             this.sideMenuView.setElement(this.$('.menu'));
-            this.sideMenuView.render();
         }
     });
 

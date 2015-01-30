@@ -1,4 +1,2 @@
-<div class="logo">
-    <img src="img/logo.png" alt="logo">
-</div>
+<div class="logo icon-book"></div>
 <ul class="menu">menu</ul>

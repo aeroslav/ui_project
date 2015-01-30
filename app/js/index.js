@@ -4944,7 +4944,7 @@ define('backbone', [
     return Backbone;
 });
 define('src/templates/wrapped/tSideMenu', [], function () {
-    return '<% _.each(data.menuLinks, function(el){ %>\r\n<li class="menu-item">\r\n    <a href="#section=<%=el%>" class="menu-link"><%=el%></a>\r\n</li>\r\n<% }); %>';
+    return '<% _.each(data.menuLinks, function(val, key){ %>\r\n<li class="menu-item">\r\n    <a href="#section/<%=key%>" class="menu-link"><span class="menu-link-tag"><%=key%></span><span class="menu-link-counter"><%=val%></span> </a>\r\n</li>\r\n<% }); %>';
 });
 define('views/sideMenuView', [
     'require',
@@ -4954,44 +4954,55 @@ define('views/sideMenuView', [
     'src/templates/wrapped/tSideMenu'
 ], function (require) {
     var Backbone = require('backbone'), tSideMenu = require('src/templates/wrapped/tSideMenu');
-    var tFnSideMenu = _.template(tSideMenu, { variable: 'data' }), links = [];
     var SideMenuView = Backbone.View.extend({
+        events: {},
         initialize: function (opt) {
-            this.artColl = opt.artColl;
-            this.listenTo(this.artColl, 'cUpdate', this.updateLinks);
-            this.listenTo(opt.router, 'route:section', function (sec) {
-                var menuLinks = $('.menu-link');
-                menuLinks.removeClass('is-current');
-                menuLinks.each(function (i, el) {
-                    if (el.text === sec) {
-                        $(el).addClass('is-current');
-                    }
-                    ;
-                });
-            });
+            this.template = _.template(tSideMenu, { variable: 'data' });
+            this.router = opt.router;
+            this.links = {};
+            this.articlesCollection = opt.articlesCollection;
+            this.listenTo(this.articlesCollection, 'success', this.updateLinks);
         },
         render: function () {
-            this.$el.html(tFnSideMenu({ menuLinks: links }));
+            var curRoute = this.router.current();
+            this.$el.html(this.template({ menuLinks: this.links }));
+            if (curRoute.route === 'section') {
+                this.selectTag(curRoute.params[0]);
+            } else {
+                this.router.navigate('section/All', { trigger: true });
+            }
+            ;
         },
         updateLinks: function () {
-            links = [];
-            links.push('All');
-            _.each(this.artColl.models, function (article) {
+            this.links['All'] = 0;
+            _.each(this.articlesCollection.models, function (article) {
                 var tags = article.attributes.tags;
                 _.each(tags, function (tag) {
-                    if (!_.contains(links, tag)) {
-                        links.push(tag);
+                    if (!_.has(this.links, tag)) {
+                        this.links[tag] = 1;
+                    } else {
+                        this.links[tag]++;
                     }
-                });
-            });
-            console.log(links);
+                }, this);
+                this.links['All']++;
+            }, this);
             this.render();
+        },
+        selectTag: function (tag) {
+            $('.menu-link').each(function (i, el) {
+                var elTag = $('.menu-link-tag', el);
+                if (elTag.text() === tag) {
+                    $('.menu-link').removeClass('is-current');
+                    $(el).addClass('is-current');
+                }
+                ;
+            });
         }
     });
     return SideMenuView;
 });
 define('src/templates/wrapped/tSidebar', [], function () {
-    return '<div class="logo">\n    <img src="img/logo.png" alt="logo">\n</div>\n<ul class="menu">menu</ul>';
+    return '<div class="logo icon-book"></div>\n<ul class="menu">menu</ul>';
 });
 define('views/sidebarView', [
     'require',
@@ -5002,19 +5013,18 @@ define('views/sidebarView', [
     'src/templates/wrapped/tSidebar'
 ], function (require) {
     var Backbone = require('backbone'), SideMenuView = require('views/sideMenuView'), tSidebar = require('src/templates/wrapped/tSidebar');
-    var tFnSidebar = _.template(tSidebar);
     var SidebarView = Backbone.View.extend({
         initialize: function (opt) {
+            this.template = _.template(tSidebar);
             this.sideMenuView = new SideMenuView({
-                artColl: opt.artColl,
+                articlesCollection: opt.articlesCollection,
                 router: opt.router
             });
             this.render();
         },
         render: function () {
-            this.$el.html(tFnSidebar({}));
+            this.$el.html(this.template({}));
             this.sideMenuView.setElement(this.$('.menu'));
-            this.sideMenuView.render();
         }
     });
     return SidebarView;
@@ -5048,17 +5058,11 @@ define('collections/articlesCollection', [
     var Backbone = require('backbone'), ArticleModel = require('models/articleModel');
     var ArticlesCollection = Backbone.Collection.extend({
         model: ArticleModel,
-        initialize: function (opt) {
-            if (_.isObject(opt))
-                this.url = opt.url;
-            else {
-                return false;
-            }
-            ;
+        fetchUrl: function (url) {
+            this.url = url;
             this.fetch({
                 success: function (coll, res) {
-                    console.log('---fetching---');
-                    coll.trigger('cUpdate');
+                    coll.trigger('success');
                 },
                 error: function (coll, res) {
                     console.log('error fetching ArticlesCollection', res);
@@ -5070,7 +5074,7 @@ define('collections/articlesCollection', [
     return ArticlesCollection;
 });
 define('src/templates/wrapped/tArticlesList', [], function () {
-    return '<div class="articlesList">\r\n<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article class="articlesList-article">\r\n        <h2><a href="#article=<%= el.cid %>"><%= rec.header %></a></h2>\r\n        <p class="intro"><%= rec.intro %></p>\r\n    </article>\r\n<% }) %>\r\n</div>';
+    return '<div class="articlesList">\r\n<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article class="articlesList-article">\r\n        <h2><a href="#article=<%= el.cid %>"><%= rec.header %></a></h2>\r\n        <p class="articlesList-article-info">\r\n            <span class="articlesList-article-author"><%= rec.author %>,</span>\r\n            <span class="articlesList-article-date"><%= rec.date %></span>\r\n        </p>\r\n        <div class="articlesList-article-intro"><%= rec.intro %></div>\r\n        <div class="articlesList-article-tags">\r\n            <% _.each(rec.tags, function(tag){ %>\r\n                <a href="#section/<%=tag%>" class="tag-link"><%= tag %></a>&nbsp;\r\n            <% }) %>\r\n        </div>\r\n        <div class="articleList-article">\r\n            <button href="" class="articleList-article-archiveBtn"><i class="icon-box-add"></i></button>\r\n            <button href="" class="articleList-article-removeBtn"><i class="icon-bin2"></i></button>\r\n        </div>\r\n    </article>\r\n<% }) %>\r\n</div>';
 });
 define('views/articlesListView', [
     'require',
@@ -5081,29 +5085,38 @@ define('views/articlesListView', [
     'src/templates/wrapped/tArticlesList'
 ], function (require) {
     var Backbone = require('backbone'), ArticlesCollection = require('collections/articlesCollection'), tArticlesList = require('src/templates/wrapped/tArticlesList');
-    var tFnArticlesList = _.template(tArticlesList, { variable: 'data' }), curArticlesCollection = new ArticlesCollection();
     var ArticlesListView = Backbone.View.extend({
         initialize: function (opt) {
-            this.artColl = opt.artColl;
-            this.listenTo(this.artColl, 'cUpdate', this.updateArticleList);
+            this.curTag = 'All';
+            this.template = _.template(tArticlesList, { variable: 'data' });
+            this.articlesCollection = opt.articlesCollection;
+            this.curArticlesCollection = new ArticlesCollection();
+            this.listenTo(this.articlesCollection, 'success', this.updateArticlesList);
         },
         render: function () {
-            this.$el.html(tFnArticlesList({ articles: curArticlesCollection.models }));
+            this.$el.html(this.template({ articles: this.curArticlesCollection.models }));
         },
-        updateArticleList: function (tag) {
-            _.each(this.artColl.models, function (article) {
+        updateArticlesList: function (tag) {
+            console.log('updating articles list by tag =', tag, ' curTag =', this.curTag);
+            this.curArticlesCollection.reset();
+            if (tag)
+                this.curTag = tag;
+            else
+                tag = this.curTag;
+            _.each(this.articlesCollection.models, function (article) {
                 var tags = article.attributes.tags;
-                if (tag) {
+                if (tag && tag !== 'All') {
                     if (_.contains(tags, tag)) {
-                        curArticlesCollection.push(article);
+                        this.curArticlesCollection.push(article);
                     }
                 } else {
-                    curArticlesCollection.push(article);
+                    this.curArticlesCollection.push(article);
                 }
-            });
+            }, this);
             this.render();
         }
     });
+    console.log('ArticlesListView ready');
     return ArticlesListView;
 });
 define('views/appView', [
@@ -5112,22 +5125,29 @@ define('views/appView', [
     'module',
     'backbone',
     'views/sidebarView',
+    'collections/articlesCollection',
     'views/articlesListView'
 ], function (require) {
-    var Backbone = require('backbone'), SidebarView = require('views/sidebarView'), ArticlesListView = require('views/articlesListView');
+    var Backbone = require('backbone'), SidebarView = require('views/sidebarView'), ArticlesCollection = require('collections/articlesCollection'), ArticlesListView = require('views/articlesListView');
     var AppView = Backbone.View.extend({
         initialize: function (opt) {
-            var sidebarView = new SidebarView({
-                    el: $('aside'),
-                    artColl: opt.artColl,
-                    router: opt.router
-                }), articlesListView = new ArticlesListView({
-                    el: $('main'),
-                    artColl: opt.artColl,
-                    router: opt.router
-                });
+            this.router = opt.router;
+            this.router.appView = this;
+            this.articlesCollection = new ArticlesCollection();
+            this.articlesCollection.fetchUrl('/json/articles.json');
+            this.sidebarView = new SidebarView({
+                el: $('aside'),
+                articlesCollection: this.articlesCollection,
+                router: this.router
+            });
+            this.articlesListView = new ArticlesListView({
+                el: $('main'),
+                articlesCollection: this.articlesCollection,
+                router: this.router
+            });
         }
     });
+    console.log('appView ready');
     return AppView;
 });
 define('router', [
@@ -5141,13 +5161,30 @@ define('router', [
     var Router = Backbone.Router.extend({
         routes: {
             '': 'start',
-            'section=:section': 'section'
+            'section/:section': 'section'
         },
         start: function () {
-            console.log('router fire start');
         },
         section: function (section) {
-            console.log(section);
+            this.appView.sidebarView.sideMenuView.selectTag(section);
+            this.appView.articlesListView.curTag = section;
+            this.appView.articlesListView.updateArticlesList(section);
+        },
+        current: function () {
+            var Router = this, fragment = Backbone.history.fragment, routes = _.pairs(Router.routes), route = null, params = null, matched;
+            matched = _.find(routes, function (handler) {
+                route = _.isRegExp(handler[0]) ? handler[0] : Router._routeToRegExp(handler[0]);
+                return route.test(fragment);
+            });
+            if (matched) {
+                params = Router._extractParameters(route, fragment);
+                route = matched[1];
+            }
+            return {
+                route: route,
+                fragment: fragment,
+                params: params
+            };
         }
     });
     return Router;
@@ -5158,19 +5195,12 @@ define('app', [
     'module',
     'backbone',
     'views/appView',
-    'collections/articlesCollection',
     'router'
 ], function (require) {
-    var Backbone = require('backbone'), AppView = require('views/appView'), ArticlesCollection = require('collections/articlesCollection'), Router = require('router');
+    var Backbone = require('backbone'), AppView = require('views/appView'), Router = require('router');
     var router = new Router();
+    appView = new AppView({ router: router });
     Backbone.history.start();
-    var articlesCollection = new ArticlesCollection({ url: '/json/articles.json' });
-    appView = new AppView({
-        artColl: articlesCollection,
-        router: router
-    });
-    router.navigate('section=All', { trigger: true });
-    console.log('app');
 });
 requirejs.config({
     baseUrl: 'js',
@@ -5192,7 +5222,6 @@ requirejs.config({
     }
 });
 requirejs(['app'], function (app) {
-    console.log('main module loaded');
 });
 define('./src/js/main', ['app'], function () {
     return;

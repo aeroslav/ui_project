@@ -18,6 +18,4 @@ requirejs.config({
         }
     }
 });
-requirejs(['app'], function(app) {
-    console.log('main module loaded');
-});
+requirejs(['app'], function(app) {});

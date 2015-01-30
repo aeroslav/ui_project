@@ -43,7 +43,7 @@ gulp.task('css', function () {
             cascade: false,
             remove: true
         }))
-        .pipe(minifyCSS({ keepBreaks: false }))
+        //.pipe(minifyCSS({ keepBreaks: false }))
         //.pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('./app/css'))
         .pipe(browserSync.reload({ stream:true }));
@@ -60,6 +60,6 @@ gulp.task('templates', ['wrap-templates', 'js']);
 gulp.task('default', ['templates', 'css', 'js', 'browser-sync'], function() {
     gulp.watch('./src/templates/**/*.js', ['templates']);
     gulp.watch('./src/js/**/*.js', ['js']);
-    gulp.watch('./src/less/*.less', ['css']);
+    gulp.watch('./src/less/**/*.less', ['css']);
     gulp.watch('./app/*.html', ['bs-reload']);
 });

@@ -3,15 +3,38 @@ define(function(require){
     var b = require('backbone');
 
     var Router = Backbone.Router.extend({
+
         routes: {
             '': 'start',
-            'section=:section': 'section'
+            'section/:section': 'section'
         },
-        start: function () {
-            console.log('router fire start');
-        },
+
+        start: function () {},
+
         section: function(section) {
-            console.log(section);
+            this.appView.sidebarView.sideMenuView.selectTag(section);
+            this.appView.articlesListView.curTag = section;
+            this.appView.articlesListView.updateArticlesList(section);
+        },
+
+        current : function() {
+            var Router = this,
+                fragment = Backbone.history.fragment,
+                routes = _.pairs(Router.routes),
+                route = null, params = null, matched;
+            matched = _.find(routes, function(handler) {
+                route = _.isRegExp(handler[0]) ? handler[0] : Router._routeToRegExp(handler[0]);
+                return route.test(fragment);
+            });
+            if(matched) {
+                params = Router._extractParameters(route, fragment);
+                route = matched[1];
+            }
+            return {
+                route : route,
+                fragment : fragment,
+                params : params
+            };
         }
     });
 
