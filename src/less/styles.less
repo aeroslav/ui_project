@@ -1,5 +1,5 @@
 @import 'normalize';
-@import 'vars';
+@import 'vars_mixins';
 @import 'gridlover';
 @import 'icomoon';
 
@@ -22,10 +22,10 @@ a {
         outline: none;
     }
     &:visited {
-        color: desaturate(@c-green, 20%);
+        color: @c-green-dark;
     }
     &:hover {
-        color: spin(saturate(@c-green, 20%), 20);
+        color: @c-blue;
     }
 }
 ul, li {
@@ -89,16 +89,17 @@ main {
     border-right: 0px solid @c-grey;
     color: @c-dark;
     transition: all .2s ease-out;
-    &:visited {
-        color: @c-dark;
-    }
     &:hover, &.is-current {
-        border-right: 8px solid @c-grey;
+        border-right: 4px solid @c-grey;
+        color: @c-dark;
         background-color: @c-green;
         & .menu-link-counter {
             color: @c-light;
             border-color: @c-light;
         }
+    }
+    &:visited {
+        color: @c-dark;
     }
 }
 .menu-link-counter {
@@ -117,45 +118,50 @@ main {
     color: @c-green;
     transition: color, border-color .2s ease-out;
 }
-.articlesList {
+.articlesList, .singleArticleContainer {
+    height: 0;
     max-width: 900px;
     margin: 0 auto;
-    border: 1px solid @c-light;
-    box-shadow: 0 10px 15px @c-dark;
+    overflow: hidden;
+    &.is-visible {
+        height: auto;
+        min-height: 100%;
+        border: 1px solid @c-light;
+        box-shadow: 0 10px 15px @c-dark;
+    }
 }
-.articlesList-article {
+.articleCard {
     padding: @base-line-height*2 @base-font-size*2 @base-line-height*2;
     position: relative;
     border-bottom: 1px solid @c-grey;
-    transition: box-shadow .3s ease-out;
-    h2 {
-        margin-top: 0;
-        margin-bottom: 0;
-    }
+    transition: box-shadow .2s ease-out;
     &:hover {
         box-shadow: 0 2px 12px @c-grey;
     }
 }
-.articlesList-article-info {
+.articleCard-heading {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+.articleCard-info {
     margin-top: 0;
 }
-.articlesList-article-author, .articlesList-article-date {
+.articleCard-author, .articleCard-date {
     font-family: serif;
     font-style: italic;
 }
-.articlesList-article-intro {
+.articleCard-intro {
     font-family: serif;
     p:last-of-type {
         margin-bottom: 0;
     }
 }
-.articlesList-article-tags {
+.articleCard-tags {
     margin-top: .2em;
     font-style: italic;
     font-size: .8em;
 }
-.articleList-article-archiveBtn,
-.articleList-article-removeBtn {
+.articleCard-Btn {
     display: block;
     width: @base-font-size*2;
     height: @base-font-size*1.6;
@@ -166,15 +172,18 @@ main {
     background-color: transparent;
     border: none;
     &:hover {
-        color: spin(saturate(@c-green, 20%), 20);
+        color: @c-blue;
     }
     &:active {
         color: @c-grey;
     }
 }
-.articleList-article-archiveBtn {
-    right: @base-font-size*5;
+.articlesList {
+    .btn-pos(2);
 }
-.articleList-article-removeBtn {
-    right: @base-font-size*2;
+.singleArticleContainer {
+    .btn-pos(3);
+}
+.articleCard-Btn-Close:hover {
+    color: @c-raspberry;
 }

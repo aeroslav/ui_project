@@ -13,7 +13,7 @@
         "date": "January 20, 2015",
         "intro": "<p>We all want to design great typographic experiences. We also want to serve users on an increasing range of devices and contexts. But today’s webfonts tie our responsive sites and applications to inflexible type that doesn’t scale. As a result, our users get poor reading experiences and longer loading times from additional font weights.</p>",
         "html": "<h2>An introduction to font interpolation</h2><br><p>Traditional font interpolation is a process used by type designers to generate new intermediary fonts from a series of master fonts. Master fonts represent key archetypal designs across different points in a font family. By using math to automatically find the in-betweens of these points, type designers can derive additional font variants/weights from interpolation instead of designing each one manually. We can apply the same concept to our webfonts to serve different font variants for our users. For example, the H letter (H glyph) in this proof of concept (currently for desktop browsers) has light and heavy masters in order to interpolate a new font weight.</p>\n",
-        "tags": ["JavaScript", "RWD"]
+        "tags": ["Javascript", "RWD"]
     },
     {
         "header": "Axiomatic CSS and Lobotomized Owls",
@@ -29,7 +29,7 @@
         "date": "January 20, 2015",
         "intro": "<p>Interactive user interfaces are a necessity in our responsive world. Smaller screens constrain the amount of content that can be displayed at any given time, so we need techniques to keep navigation and secondary information out of the way until they’re needed. From tabs and modal overlays to hidden navigation, we’ve created many powerful design patterns that show and hide content using JavaScript.</p>",
         "html": "<p>JavaScript comes with its own mobile challenges, though. Network speeds and data plans vary wildly, and every byte we deliver has an impact on the render speed of our pages or applications. When we add JavaScript to a page, we’re typically adding an external JavaScript file and an optional (usually large) library like jQuery. These interfaces won’t become usable until all the content, JavaScript files included, is downloaded—creating a slow and sluggish first impression for our users.<br>If we could create these content-on-demand patterns with no reliance on JavaScript, our interfaces would render earlier, and users could interact with them as soon as they were visible. By shifting some of the functionality to CSS, we could also reduce the amount of JavaScript needed to render the rest of our page. The result would be smaller file sizes, faster page-load times, interfaces that are available earlier, and the same functionality we’ve come to rely on from these design patterns.<br>In this article, I’ll explore a technique I’ve been working on that does just that. It’s still a bit experimental, so use your best judgment before using it in your own production systems.\n</p>",
-        "tags": ["CSS", "JavaScript"]
+        "tags": ["CSS", "Javascript"]
     },
     {
         "header": "Planning for Performance",

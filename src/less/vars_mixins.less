@@ -4,7 +4,10 @@
 //colors
 @c-text: #333333;
 @c-grey: #666666;
-@c-green: #9fc057;
+@c-green: #a3c644;
+@c-green-dark: #7f993a;
+@c-raspberry: #b22746;
+@c-blue: #39c2d7;
 @c-light: #eee;
 @c-dark: #282828;
 
@@ -39,3 +42,10 @@
 @h4-line-height: @h4-line * @h4-lines;
 @h4-margin-top: 1 * @h4-line;
 @h4-margin-bottom: 1 * @h4-line;
+
+.btn-pos(@i) when (@i > 0) {
+    .btn-pos((@i - 1));
+    .articleCard-Btn:nth-of-type(@{i}) {
+        right: @base-font-size * 2 * @i;
+    }
+}

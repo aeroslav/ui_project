@@ -5,13 +5,15 @@ define(function(require){
 
     var SidebarView = Backbone.View.extend({
         initialize: function(opt) {
-            this.template = _.template(tSidebar);
             this.sideMenuView = new SideMenuView({
                 articlesCollection: opt.articlesCollection,
                 router: opt.router
             });
             this.render();
         },
+
+        template: _.template(tSidebar),
+
         render: function() {
             this.$el.html(this.template({}));
             this.sideMenuView.setElement(this.$('.menu'));

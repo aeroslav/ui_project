@@ -4944,7 +4944,7 @@ define('backbone', [
     return Backbone;
 });
 define('src/templates/wrapped/tSideMenu', [], function () {
-    return '<% _.each(data.menuLinks, function(val, key){ %>\r\n<li class="menu-item">\r\n    <a href="#section/<%=key%>" class="menu-link"><span class="menu-link-tag"><%=key%></span><span class="menu-link-counter"><%=val%></span> </a>\r\n</li>\r\n<% }); %>';
+    return '<% _.each(data.menuLinks, function(val, key){ %>\r\n<li class="menu-item">\r\n    <a href="#section/<%= key.toLowerCase() %>" class="menu-link"><span class="menu-link-tag"><%=key%></span><span class="menu-link-counter"><%=val%></span> </a>\r\n</li>\r\n<% }); %>';
 });
 define('views/sideMenuView', [
     'require',
@@ -4955,7 +4955,6 @@ define('views/sideMenuView', [
 ], function (require) {
     var Backbone = require('backbone'), tSideMenu = require('src/templates/wrapped/tSideMenu');
     var SideMenuView = Backbone.View.extend({
-        events: {},
         initialize: function (opt) {
             this.template = _.template(tSideMenu, { variable: 'data' });
             this.router = opt.router;
@@ -4969,7 +4968,7 @@ define('views/sideMenuView', [
             if (curRoute.route === 'section') {
                 this.selectTag(curRoute.params[0]);
             } else {
-                this.router.navigate('section/All', { trigger: true });
+                this.router.navigate('section/all', { trigger: true });
             }
             ;
         },
@@ -4991,7 +4990,7 @@ define('views/sideMenuView', [
         selectTag: function (tag) {
             $('.menu-link').each(function (i, el) {
                 var elTag = $('.menu-link-tag', el);
-                if (elTag.text() === tag) {
+                if (elTag.text().toLowerCase() === tag) {
                     $('.menu-link').removeClass('is-current');
                     $(el).addClass('is-current');
                 }
@@ -5015,13 +5014,13 @@ define('views/sidebarView', [
     var Backbone = require('backbone'), SideMenuView = require('views/sideMenuView'), tSidebar = require('src/templates/wrapped/tSidebar');
     var SidebarView = Backbone.View.extend({
         initialize: function (opt) {
-            this.template = _.template(tSidebar);
             this.sideMenuView = new SideMenuView({
                 articlesCollection: opt.articlesCollection,
                 router: opt.router
             });
             this.render();
         },
+        template: _.template(tSidebar),
         render: function () {
             this.$el.html(this.template({}));
             this.sideMenuView.setElement(this.$('.menu'));
@@ -5073,8 +5072,47 @@ define('collections/articlesCollection', [
     });
     return ArticlesCollection;
 });
+define('src/templates/wrapped/tArticle', [], function () {
+    return '<% var rec = data.attributes; %>\r\n<article class="articleCard">\r\n    <h1 class="articleCard-heading"><%=rec.header%></h1>\r\n    <p class="articleCard-info">\r\n        <span class="articleCard-author"><%= rec.author %>,</span>\r\n        <span class="articleCard-date"><%= rec.date %></span>\r\n    </p>\r\n    <div class="articleCard-intro"><%= rec.intro %></div>\r\n    <div class="articleCard-text"><%= rec.html %></div>\r\n    <div class="articleCard-tags">\r\n        <% _.each(rec.tags, function(tag){ %>\r\n            <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n        <% }) %>\r\n    </div>\r\n    <div class="articleCard-btns">\r\n        <button class="articleCard-Btn articleCard-Btn-Close"><i class="icon-cross"></i></button>\r\n        <button class="articleCard-Btn articleCard-Btn-toTrash"><i class="icon-bin2"></i></button>\r\n        <button class="articleCard-Btn articleCard-Btn-toArchive"><i class="icon-box-add"></i></button>\r\n    </div>\r\n</article>';
+});
+define('views/articleView', [
+    'require',
+    'exports',
+    'module',
+    'backbone',
+    'src/templates/wrapped/tArticle'
+], function (require) {
+    var Backbone = require('backbone'), tSidebar = require('src/templates/wrapped/tArticle');
+    var ArticleView = Backbone.View.extend({
+        events: { 'click .articleCard-Btn-Close': 'closeSingleView' },
+        closeSingleView: function () {
+            console.log('close');
+            var route = $('.menu-link.is-current .menu-link-tag').text();
+            console.log(route);
+            this.router.navigate('section/' + route.toLowerCase(), { trigger: true });
+        },
+        initialize: function (opt) {
+            this.router = opt.router;
+        },
+        template: _.template(tSidebar, { variable: 'data' }),
+        render: function () {
+            this.$el.html(this.template(this.article));
+        },
+        showArticle: function (article) {
+            this.article = article;
+            this.render();
+        },
+        expand: function () {
+            this.$el.addClass('is-visible');
+        },
+        collapse: function () {
+            this.$el.removeClass('is-visible');
+        }
+    });
+    return ArticleView;
+});
 define('src/templates/wrapped/tArticlesList', [], function () {
-    return '<div class="articlesList">\r\n<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article class="articlesList-article">\r\n        <h2><a href="#article=<%= el.cid %>"><%= rec.header %></a></h2>\r\n        <p class="articlesList-article-info">\r\n            <span class="articlesList-article-author"><%= rec.author %>,</span>\r\n            <span class="articlesList-article-date"><%= rec.date %></span>\r\n        </p>\r\n        <div class="articlesList-article-intro"><%= rec.intro %></div>\r\n        <div class="articlesList-article-tags">\r\n            <% _.each(rec.tags, function(tag){ %>\r\n                <a href="#section/<%=tag%>" class="tag-link"><%= tag %></a>&nbsp;\r\n            <% }) %>\r\n        </div>\r\n        <div class="articleList-article">\r\n            <button href="" class="articleList-article-archiveBtn"><i class="icon-box-add"></i></button>\r\n            <button href="" class="articleList-article-removeBtn"><i class="icon-bin2"></i></button>\r\n        </div>\r\n    </article>\r\n<% }) %>\r\n</div>';
+    return '<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article class="articleCard">\r\n        <h2 class="articleCard-heading"><a href="#article/<%= el.cid %>"><%= rec.header %></a></h2>\r\n        <p class="articleCard-info">\r\n            <span class="articleCard-author"><%= rec.author %>,</span>\r\n            <span class="articleCard-date"><%= rec.date %></span>\r\n        </p>\r\n        <div class="articleCard-intro"><%= rec.intro %></div>\r\n        <div class="articleCard-tags">\r\n            <% _.each(rec.tags, function(tag){ %>\r\n                <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n            <% }) %>\r\n        </div>\r\n        <div class="articleCard-btns">\r\n            <button class="articleCard-Btn articleCard-Btn-toTrash"><i class="icon-bin2"></i></button>\r\n            <button class="articleCard-Btn articleCard-Btn-toArchive"><i class="icon-box-add"></i></button>\r\n        </div>\r\n    </article>\r\n<% }) %>';
 });
 define('views/articlesListView', [
     'require',
@@ -5087,12 +5125,12 @@ define('views/articlesListView', [
     var Backbone = require('backbone'), ArticlesCollection = require('collections/articlesCollection'), tArticlesList = require('src/templates/wrapped/tArticlesList');
     var ArticlesListView = Backbone.View.extend({
         initialize: function (opt) {
-            this.curTag = 'All';
-            this.template = _.template(tArticlesList, { variable: 'data' });
+            this.curTag = 'all';
             this.articlesCollection = opt.articlesCollection;
             this.curArticlesCollection = new ArticlesCollection();
             this.listenTo(this.articlesCollection, 'success', this.updateArticlesList);
         },
+        template: _.template(tArticlesList, { variable: 'data' }),
         render: function () {
             this.$el.html(this.template({ articles: this.curArticlesCollection.models }));
         },
@@ -5104,8 +5142,10 @@ define('views/articlesListView', [
             else
                 tag = this.curTag;
             _.each(this.articlesCollection.models, function (article) {
-                var tags = article.attributes.tags;
-                if (tag && tag !== 'All') {
+                var tags = _.map(article.attributes.tags, function (el) {
+                    return el.toLowerCase();
+                });
+                if (tag && tag !== 'all') {
                     if (_.contains(tags, tag)) {
                         this.curArticlesCollection.push(article);
                     }
@@ -5114,9 +5154,14 @@ define('views/articlesListView', [
                 }
             }, this);
             this.render();
+        },
+        expand: function () {
+            this.$el.addClass('is-visible');
+        },
+        collapse: function () {
+            this.$el.removeClass('is-visible');
         }
     });
-    console.log('ArticlesListView ready');
     return ArticlesListView;
 });
 define('views/appView', [
@@ -5126,28 +5171,63 @@ define('views/appView', [
     'backbone',
     'views/sidebarView',
     'collections/articlesCollection',
+    'views/articleView',
     'views/articlesListView'
 ], function (require) {
-    var Backbone = require('backbone'), SidebarView = require('views/sidebarView'), ArticlesCollection = require('collections/articlesCollection'), ArticlesListView = require('views/articlesListView');
+    var Backbone = require('backbone'), SidebarView = require('views/sidebarView'), ArticlesCollection = require('collections/articlesCollection'), ArticleView = require('views/articleView'), ArticlesListView = require('views/articlesListView');
     var AppView = Backbone.View.extend({
         initialize: function (opt) {
             this.router = opt.router;
-            this.router.appView = this;
             this.articlesCollection = new ArticlesCollection();
             this.articlesCollection.fetchUrl('/json/articles.json');
+            this.initializeNested();
+            this.router.on('stateChange', this.routerStateChangeHandler, this);
+        },
+        routerStateChangeHandler: function (state, id) {
+            switch (state) {
+            case 'section':
+                console.log('show list');
+                this.switchToListView();
+                this.sidebarView.sideMenuView.selectTag(id);
+                this.articlesListView.curTag = id;
+                this.articlesListView.updateArticlesList(id);
+                break;
+            case 'article':
+                console.log('show article');
+                this.switchToSingleView();
+                this.articleView.showArticle(this.articlesCollection.get(id));
+                break;
+            default:
+                console.log('default');
+                break;
+            }
+            ;
+        },
+        initializeNested: function () {
             this.sidebarView = new SidebarView({
                 el: $('aside'),
                 articlesCollection: this.articlesCollection,
                 router: this.router
             });
             this.articlesListView = new ArticlesListView({
-                el: $('main'),
-                articlesCollection: this.articlesCollection,
+                el: $('.articlesList'),
+                articlesCollection: this.articlesCollection
+            });
+            this.articleView = new ArticleView({
+                el: $('.singleArticleContainer'),
+                article: {},
                 router: this.router
             });
+        },
+        switchToSingleView: function () {
+            this.articlesListView.collapse();
+            this.articleView.expand();
+        },
+        switchToListView: function () {
+            this.articleView.collapse();
+            this.articlesListView.expand();
         }
     });
-    console.log('appView ready');
     return AppView;
 });
 define('router', [
@@ -5161,14 +5241,17 @@ define('router', [
     var Router = Backbone.Router.extend({
         routes: {
             '': 'start',
-            'section/:section': 'section'
+            'section/:section': 'section',
+            'article/:articleId': 'article'
         },
         start: function () {
+            this.trigger('stateChange', 'start', '/');
         },
-        section: function (section) {
-            this.appView.sidebarView.sideMenuView.selectTag(section);
-            this.appView.articlesListView.curTag = section;
-            this.appView.articlesListView.updateArticlesList(section);
+        section: function (id) {
+            this.trigger('stateChange', 'section', id);
+        },
+        article: function (articleId) {
+            this.trigger('stateChange', 'article', articleId);
         },
         current: function () {
             var Router = this, fragment = Backbone.history.fragment, routes = _.pairs(Router.routes), route = null, params = null, matched;

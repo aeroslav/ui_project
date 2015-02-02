@@ -224,8 +224,8 @@ sub {
 }
 @font-face {
   font-family: 'icomoon';
-  src: url('../fonts/icomoon.eot?9b5uji');
-  src: url('../fonts/icomoon.eot?#iefix9b5uji') format('embedded-opentype'), url('../fonts/icomoon.woff?9b5uji') format('woff'), url('../fonts/icomoon.ttf?9b5uji') format('truetype'), url('../fonts/icomoon.svg?9b5uji#icomoon') format('svg');
+  src: url('../fonts/icomoon.eot?-kbryo');
+  src: url('../fonts/icomoon.eot?#iefix-kbryo') format('embedded-opentype'), url('../fonts/icomoon.woff?-kbryo') format('woff'), url('../fonts/icomoon.ttf?-kbryo') format('truetype'), url('../fonts/icomoon.svg?-kbryo#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -238,7 +238,6 @@ sub {
   font-variant: normal;
   text-transform: none;
   line-height: 1;
-  /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -250,6 +249,9 @@ sub {
 }
 .icon-bin2:before {
   content: "\e9ad";
+}
+.icon-cross:before {
+  content: "\ea0f";
 }
 * {
   margin: 0;
@@ -265,17 +267,17 @@ body {
   color: #333333;
 }
 a {
-  color: #9fc057;
+  color: #a3c644;
   text-decoration: none;
 }
 a:focus {
   outline: none;
 }
 a:visited {
-  color: #96a96e;
+  color: #7f993a;
 }
 a:hover {
-  color: #75d740;
+  color: #39c2d7;
 }
 ul,
 li {
@@ -310,7 +312,7 @@ main {
   position: fixed;
   top: 0;
   left: 0;
-  background-color: #9fc057;
+  background-color: #a3c644;
   transition: width .2s linear;
 }
 .logo {
@@ -341,18 +343,19 @@ main {
   color: #282828;
   transition: all 0.2s ease-out;
 }
-.menu-link:visited {
-  color: #282828;
-}
 .menu-link:hover,
 .menu-link.is-current {
-  border-right: 8px solid #666666;
-  background-color: #9fc057;
+  border-right: 4px solid #666666;
+  color: #282828;
+  background-color: #a3c644;
 }
 .menu-link:hover .menu-link-counter,
 .menu-link.is-current .menu-link-counter {
   color: #eeeeee;
   border-color: #eeeeee;
+}
+.menu-link:visited {
+  color: #282828;
 }
 .menu-link-counter {
   display: block;
@@ -362,75 +365,92 @@ main {
   margin-left: 1em;
   float: right;
   border-radius: 50%;
-  border: 1px solid #9fc057;
+  border: 1px solid #a3c644;
   text-align: center;
   font-size: .8em;
   line-height: 1.7;
   font-weight: bold;
-  color: #9fc057;
+  color: #a3c644;
   transition: color, border-color 0.2s ease-out;
 }
-.articlesList {
+.articlesList,
+.singleArticleContainer {
+  height: 0;
   max-width: 900px;
   margin: 0 auto;
+  overflow: hidden;
+}
+.articlesList.is-visible,
+.singleArticleContainer.is-visible {
+  height: auto;
+  min-height: 100%;
   border: 1px solid #eeeeee;
   box-shadow: 0 10px 15px #282828;
 }
-.articlesList-article {
+.articleCard {
   padding: 44px 32px 44px;
   position: relative;
   border-bottom: 1px solid #666666;
-  transition: box-shadow 0.3s ease-out;
+  transition: box-shadow 0.2s ease-out;
 }
-.articlesList-article h2 {
+.articleCard:hover {
+  box-shadow: 0 2px 12px #666666;
+}
+.articleCard-heading {
   margin-top: 0;
   margin-bottom: 0;
 }
-.articlesList-article:hover {
-  box-shadow: 0 2px 12px #666666;
-}
-.articlesList-article-info {
+.articleCard-info {
   margin-top: 0;
 }
-.articlesList-article-author,
-.articlesList-article-date {
+.articleCard-author,
+.articleCard-date {
   font-family: serif;
   font-style: italic;
 }
-.articlesList-article-intro {
+.articleCard-intro {
   font-family: serif;
 }
-.articlesList-article-intro p:last-of-type {
+.articleCard-intro p:last-of-type {
   margin-bottom: 0;
 }
-.articlesList-article-tags {
+.articleCard-tags {
   margin-top: .2em;
   font-style: italic;
   font-size: .8em;
 }
-.articleList-article-archiveBtn,
-.articleList-article-removeBtn {
+.articleCard-Btn {
   display: block;
   width: 32px;
   height: 25.6px;
   position: absolute;
   top: 44px;
   font-size: 1.1em;
-  color: #9fc057;
+  color: #a3c644;
   background-color: transparent;
   border: none;
 }
-.articleList-article-archiveBtn:hover,
-.articleList-article-removeBtn:hover {
-  color: #75d740;
+.articleCard-Btn:hover {
+  color: #39c2d7;
 }
-.articleList-article-archiveBtn:active,
-.articleList-article-removeBtn:active {
+.articleCard-Btn:active {
   color: #666666;
 }
-.articleList-article-archiveBtn {
-  right: 80px;
-}
-.articleList-article-removeBtn {
+.articlesList .articleCard-Btn:nth-of-type(1) {
   right: 32px;
+}
+.articlesList .articleCard-Btn:nth-of-type(2) {
+  right: 64px;
+}
+.singleArticleContainer .articleCard-Btn:nth-of-type(1) {
+  right: 32px;
+}
+.singleArticleContainer .articleCard-Btn:nth-of-type(2) {
+  right: 64px;
+}
+.singleArticleContainer .articleCard-Btn:nth-of-type(3) {
+  right: 96px;
+}
+.articleCard-Btn-Close:hover {
+  color: #b22746;
 }

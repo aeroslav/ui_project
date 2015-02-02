@@ -4,10 +4,6 @@ define(function(require){
 
     var SideMenuView = Backbone.View.extend({
 
-        events: {
-            //'click .menu-link': 'tagClick'
-        },
-
         initialize: function(opt) {
             this.template = _.template(tSideMenu, {variable: 'data'});
             this.router = opt.router;
@@ -22,7 +18,7 @@ define(function(require){
             if (curRoute.route === 'section') {
                 this.selectTag(curRoute.params[0]);
             } else {
-                this.router.navigate('section/All', {trigger: true});
+                this.router.navigate('section/all', {trigger: true});
             };
         },
 
@@ -45,7 +41,8 @@ define(function(require){
         selectTag: function(tag) {
             $('.menu-link').each(function(i, el) {
                 var elTag = $('.menu-link-tag', el);
-                if (elTag.text() === tag) {
+
+                if (elTag.text().toLowerCase() === tag) {
                     $('.menu-link').removeClass('is-current');
                     $(el).addClass('is-current');
                 };

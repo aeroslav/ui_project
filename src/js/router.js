@@ -6,15 +6,20 @@ define(function(require){
 
         routes: {
             '': 'start',
-            'section/:section': 'section'
+            'section/:section': 'section',
+            'article/:articleId': 'article'
         },
 
-        start: function () {},
+        start: function () {
+            this.trigger('stateChange', 'start', '/');
+        },
 
-        section: function(section) {
-            this.appView.sidebarView.sideMenuView.selectTag(section);
-            this.appView.articlesListView.curTag = section;
-            this.appView.articlesListView.updateArticlesList(section);
+        section: function(id) {
+            this.trigger('stateChange', 'section', id);
+        },
+
+        article: function(articleId) {
+            this.trigger('stateChange', 'article', articleId);
         },
 
         current : function() {
@@ -26,7 +31,7 @@ define(function(require){
                 route = _.isRegExp(handler[0]) ? handler[0] : Router._routeToRegExp(handler[0]);
                 return route.test(fragment);
             });
-            if(matched) {
+            if (matched) {
                 params = Router._extractParameters(route, fragment);
                 route = matched[1];
             }

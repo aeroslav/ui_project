@@ -6,12 +6,13 @@ define(function(require){
     var ArticlesListView = Backbone.View.extend({
 
         initialize: function(opt) {
-            this.curTag = 'All';
-            this.template = _.template(tArticlesList, {variable: 'data'});
+            this.curTag = 'all';
             this.articlesCollection = opt.articlesCollection;
             this.curArticlesCollection = new ArticlesCollection();
             this.listenTo(this.articlesCollection, 'success', this.updateArticlesList);
         },
+
+        template: _.template(tArticlesList, {variable: 'data'}),
 
         render: function() {
             this.$el.html(this.template({ articles: this.curArticlesCollection.models }));
@@ -24,8 +25,10 @@ define(function(require){
             if (tag) this.curTag = tag
             else tag = this.curTag;
             _.each(this.articlesCollection.models, function(article) {
-                var tags = article.attributes.tags;
-                if (tag && (tag !== 'All') ) {
+                var tags = _.map(article.attributes.tags, function(el) {
+                    return el.toLowerCase();
+                });
+                if (tag && (tag !== 'all') ) {
                     if (_.contains(tags, tag)) {
                         this.curArticlesCollection.push(article);
                     }
@@ -34,8 +37,16 @@ define(function(require){
                 }
             }, this);
             this.render();
+        },
+
+        expand: function() {
+            this.$el.addClass('is-visible');
+        },
+
+        collapse: function() {
+            this.$el.removeClass('is-visible');
         }
     });
-    console.log('ArticlesListView ready');
+
     return ArticlesListView;
 });
