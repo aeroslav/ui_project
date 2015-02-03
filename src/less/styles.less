@@ -21,9 +21,6 @@ a {
     &:focus {
         outline: none;
     }
-    &:visited {
-        color: @c-green-dark;
-    }
     &:hover {
         color: @c-blue;
     }
@@ -44,10 +41,12 @@ aside {
     float: left;
     overflow: auto;
     background-color: @c-light;
+    ul {
+        margin-bottom: @base-font-size;
+    }
 }
 main {
     height: 100%;
-    padding: 10px;
     margin-left: @aside-width;
     overflow: auto;
 }
@@ -71,7 +70,7 @@ main {
         color: @c-grey;
     }
 }
-.menu, .toc {
+.menu-tags, .menu-storage, .toc {
     display: block;
     text-align: right;
 }
@@ -120,23 +119,21 @@ main {
 }
 .articlesList, .singleArticleContainer {
     height: 0;
-    max-width: 900px;
-    margin: 0 auto;
     overflow: hidden;
     &.is-visible {
-        height: auto;
-        min-height: 100%;
-        border: 1px solid @c-light;
-        box-shadow: 0 10px 15px @c-dark;
+        height: 100%;
+        overflow-y: scroll;
     }
 }
 .articleCard {
-    padding: @base-line-height*2 @base-font-size*2 @base-line-height*2;
+    max-width: 900px;
+    padding: @base-line-height*1 @base-font-size*2 @base-line-height*1;
+    margin: @base-font-size/2 auto;
     position: relative;
-    border-bottom: 1px solid @c-grey;
+    box-shadow: 0 2px 2px -2px @c-grey;
     transition: box-shadow .2s ease-out;
     &:hover {
-        box-shadow: 0 2px 12px @c-grey;
+        box-shadow: 0 10px 10px -5px @c-grey;
     }
 }
 .articleCard-heading {

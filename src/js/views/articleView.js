@@ -9,10 +9,7 @@ define(function(require){
         },
 
         closeSingleView: function() {
-            console.log('close');
-            //this.router.navigate('section/all', { trigger: true });
             var route = $('.menu-link.is-current .menu-link-tag').text();
-            console.log(route);
             this.router.navigate('section/'+route.toLowerCase(), { trigger: true });
         },
 
@@ -29,16 +26,7 @@ define(function(require){
         showArticle: function(article) {
             this.article = article;
             this.render();
-        },
-
-        expand: function() {
-            this.$el.addClass('is-visible');
-        },
-
-        collapse: function() {
-            this.$el.removeClass('is-visible');
         }
-
     });
 
     return ArticleView;

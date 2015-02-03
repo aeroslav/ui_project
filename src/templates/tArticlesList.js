@@ -1,6 +1,6 @@
 <% _.each(data.articles, function(el){
     var rec = el.attributes; %>
-    <article class="articleCard">
+    <article class="articleCard" data-cid="<%= el.cid %>">
         <h2 class="articleCard-heading"><a href="#article/<%= el.cid %>"><%= rec.header %></a></h2>
         <p class="articleCard-info">
             <span class="articleCard-author"><%= rec.author %>,</span>
@@ -13,8 +13,8 @@
             <% }) %>
         </div>
         <div class="articleCard-btns">
-            <button class="articleCard-Btn articleCard-Btn-toTrash"><i class="icon-bin2"></i></button>
-            <button class="articleCard-Btn articleCard-Btn-toArchive"><i class="icon-box-add"></i></button>
+            <button class="articleCard-Btn articleCard-Btn-mark articleCard-Btn-toTrash" data-action="trash"><i class="icon-bin2"></i></button>
+            <button class="articleCard-Btn articleCard-Btn-mark articleCard-Btn-toArchive" data-action="archive"><i class="icon-box-add"></i></button>
         </div>
     </article>
 <% }) %>

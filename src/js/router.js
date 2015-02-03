@@ -7,7 +7,8 @@ define(function(require){
         routes: {
             '': 'start',
             'section/:section': 'section',
-            'article/:articleId': 'article'
+            'article/:articleId': 'article',
+            'storage/:storage': 'storage',
         },
 
         start: function () {
@@ -20,6 +21,10 @@ define(function(require){
 
         article: function(articleId) {
             this.trigger('stateChange', 'article', articleId);
+        },
+
+        storage: function(id) {
+            this.trigger('stateChange', 'storage', id);
         },
 
         current : function() {

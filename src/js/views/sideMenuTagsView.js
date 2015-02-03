@@ -1,16 +1,17 @@
 define(function(require){
     var Backbone = require('backbone'),
-        tSideMenu = require('src/templates/wrapped/tSideMenu');
+        tSideTagsMenu = require('src/templates/wrapped/tSideTagsMenu');
 
     var SideMenuView = Backbone.View.extend({
 
         initialize: function(opt) {
-            this.template = _.template(tSideMenu, {variable: 'data'});
             this.router = opt.router;
             this.links = {};
             this.articlesCollection = opt.articlesCollection;
             this.listenTo(this.articlesCollection, 'success', this.updateLinks);
         },
+
+        template: _.template(tSideTagsMenu, {variable: 'data'}),
 
         render: function() {
             var curRoute = this.router.current();

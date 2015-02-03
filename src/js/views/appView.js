@@ -21,16 +21,19 @@ define(function(require){
             routerStateChangeHandler: function(state, id) {
                 switch (state) {
                     case 'section':
-                        console.log('show list');
-                        this.switchToListView();
-                        this.sidebarView.sideMenuView.selectTag(id);
-                        this.articlesListView.curTag = id;
-                        this.articlesListView.updateArticlesList(id);
+                        this.showView(this.articlesListView);
+                        this.sidebarView.sideMenuTagsView.selectTag(id);
+                        this.articlesListView.setCurTag(id);
                         break;
                     case 'article':
-                        console.log('show article');
-                        this.switchToSingleView();
+                        this.showView(this.articleView);
                         this.articleView.showArticle(this.articlesCollection.get(id));
+                        break;
+                    case 'storage':
+                        console.log('storage');
+                        this.showView(this.articlesListView);
+                        this.articlesListView.updateArticlesList(false, id);
+                        //this.sidebarView.sideMenuStorageView.updateArticlesStorage(id);
                         break;
                     default:
                         console.log('default');
@@ -57,15 +60,11 @@ define(function(require){
                 });
             },
 
-            switchToSingleView: function() {
-                this.articlesListView.collapse();
-                this.articleView.expand();
+            showView: function(view) {
+                this.articlesListView.$el.removeClass('is-visible');
+                this.articleView.$el.removeClass('is-visible');
+                view.$el.addClass('is-visible');
             },
-
-            switchToListView: function() {
-                this.articleView.collapse();
-                this.articlesListView.expand();
-            }
         });
 
     return AppView;

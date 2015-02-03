@@ -1,23 +1,26 @@
 define(function(require){
     var Backbone = require('backbone'),
-        SideMenuView = require('views/sideMenuView'),
+        SideMenuTagsView = require('views/sideMenuTagsView'),
+        SideMenuStorageView = require('views/sideMenuStorageView'),
         tSidebar = require('src/templates/wrapped/tSidebar');
 
     var SidebarView = Backbone.View.extend({
         initialize: function(opt) {
-            this.sideMenuView = new SideMenuView({
+            this.sideMenuTagsView = new SideMenuTagsView({
+                el: this.$('.menu-tags'),
                 articlesCollection: opt.articlesCollection,
                 router: opt.router
             });
-            this.render();
+            this.sideMenuStorageView = new SideMenuStorageView({
+                el: this.$('.menu-storage'),
+                articlesCollection: opt.articlesCollection,
+                router: opt.router
+            });
         },
 
         template: _.template(tSidebar),
 
-        render: function() {
-            this.$el.html(this.template({}));
-            this.sideMenuView.setElement(this.$('.menu'));
-        }
+        render: function() {}
     });
 
     return SidebarView;

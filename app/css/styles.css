@@ -273,9 +273,6 @@ a {
 a:focus {
   outline: none;
 }
-a:visited {
-  color: #7f993a;
-}
 a:hover {
   color: #39c2d7;
 }
@@ -297,9 +294,11 @@ aside {
   overflow: auto;
   background-color: #eeeeee;
 }
+aside ul {
+  margin-bottom: 16px;
+}
 main {
   height: 100%;
-  padding: 10px;
   margin-left: 250px;
   overflow: auto;
 }
@@ -323,7 +322,8 @@ main {
   font-size: 7em;
   color: #666666;
 }
-.menu,
+.menu-tags,
+.menu-storage,
 .toc {
   display: block;
   text-align: right;
@@ -376,25 +376,23 @@ main {
 .articlesList,
 .singleArticleContainer {
   height: 0;
-  max-width: 900px;
-  margin: 0 auto;
   overflow: hidden;
 }
 .articlesList.is-visible,
 .singleArticleContainer.is-visible {
-  height: auto;
-  min-height: 100%;
-  border: 1px solid #eeeeee;
-  box-shadow: 0 10px 15px #282828;
+  height: 100%;
+  overflow-y: scroll;
 }
 .articleCard {
-  padding: 44px 32px 44px;
+  max-width: 900px;
+  padding: 22px 32px 22px;
+  margin: 8px auto;
   position: relative;
-  border-bottom: 1px solid #666666;
+  box-shadow: 0 2px 2px -2px #666666;
   transition: box-shadow 0.2s ease-out;
 }
 .articleCard:hover {
-  box-shadow: 0 2px 12px #666666;
+  box-shadow: 0 10px 10px -5px #666666;
 }
 .articleCard-heading {
   margin-top: 0;
