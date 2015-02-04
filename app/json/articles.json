@@ -1,5 +1,13 @@
 [
     {
+        "header": "How to",
+        "author": "Me",
+        "date": "Febraury 4, 2015",
+        "intro": "<p><ul><li>Choose any section to filter records</li><li>Click on header of a record to expand it</li><li>Click on recycle bin icon to delete record from list</li></ul></p>",
+        "html": "<p>This is great news! Sass gives us a lot more power over complex, ever-growing stylesheets, including new features like variables, control directives, and mixins that the original CSS spec (intentionally) lacked. Sass is a stylesheet language that’s robust yet flexible enough to keep pace with us.<br>Yet alongside the wide-scale adoption of Sass (which I applaud), I’ve observed a steady decline in the quality of outputted CSS (which I bemoan). It makes sense: Sass introduces a layer of abstraction between the author and the stylesheets. But we need a way to translate the web standards—that we fought so hard for—into this new environment. The problem is, the Sass specification is expanding so much that any set of standards would require constant revision. Instead, what we need is a charter—one that sits outside Sass, yet informs the way we code.<br>To see a way forward, let’s first examine some trouble spots.\n</p>",
+        "tags": ["HowTo"]
+    },
+    {
         "header": "A Vision for Our Sass",
         "author": "Felicity Evans",
         "date": "January 20, 2015",

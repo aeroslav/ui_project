@@ -1,10 +1,15 @@
 define(function(require){
-    var Backbone = require('backbone'),
-        ArticleModel = require('models/articleModel');
+    var ArticleModel = require('models/articleModel');
 
     var ArticlesCollection = Backbone.Collection.extend({
 
             model: ArticleModel,
+
+            initialize: function() {
+                this.on('change', function() {
+                    console.log('ArticlesCollection change');
+                })
+            },
 
             fetchUrl: function(url) {
                 this.url = url;
@@ -13,18 +18,14 @@ define(function(require){
                         coll.trigger('success');
                     },
                     error: function(coll, res) {
-                        console.log('error fetching ArticlesCollection', res);
+                        console.log('error fetching', coll.articlesCollection.url, '\nresponse:\n', res, '\n------------');
                     },
                     reset: true
                 });
-                this.on('change', function() {
-                    console.log('ArticlesCollection change');
-                })
             },
 
             getCids: function(criterion) { // criterion = {key: 'keyname', val: 'keyvalue'} || {key: 'keyname', val: [arr of val]}
                 if (criterion === 'all') {
-                    console.log(_.pluck(this.models, 'cid'));
                     return _.pluck(this.models, 'cid');
                 } else {
                     var returnCid = _.reduce(this.models, function(memo, model) {

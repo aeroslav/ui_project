@@ -48,6 +48,7 @@ aside {
 main {
     height: 100%;
     margin-left: @aside-width;
+    position: relative;
     overflow: auto;
 }
 .wrapper {
@@ -117,7 +118,7 @@ main {
     color: @c-green;
     transition: color, border-color .2s ease-out;
 }
-.articlesList, .singleArticleContainer {
+.articlesContainer, .singleArticleContainer {
     height: 0;
     overflow: hidden;
     &.is-visible {
@@ -175,11 +176,11 @@ main {
         color: @c-grey;
     }
 }
-.articlesList {
-    .btn-pos(2);
+.articlesContainer {
+    .btn-pos(1);
 }
 .singleArticleContainer {
-    .btn-pos(3);
+    .btn-pos(2);
 }
 .articleCard-Btn-Close:hover {
     color: @c-raspberry;

@@ -4943,63 +4943,6 @@ define('backbone', [
     }.call(this));
     return Backbone;
 });
-define('src/templates/wrapped/tSideTagsMenu', [], function () {
-    return '<% _.each(data.menuLinks, function(val, key){ %>\r\n<li class="menu-item">\r\n    <a href="#section/<%= key.toLowerCase() %>" class="menu-link">\r\n        <span class="menu-link-tag"><%=key%></span>\r\n        <span class="menu-link-counter"><%=val%></span>\r\n    </a>\r\n</li>\r\n<% }); %>\r\n';
-});
-define('views/sideMenuTagsView', [
-    'require',
-    'exports',
-    'module',
-    'backbone',
-    'src/templates/wrapped/tSideTagsMenu'
-], function (require) {
-    var Backbone = require('backbone'), tSideTagsMenu = require('src/templates/wrapped/tSideTagsMenu');
-    var SideMenuView = Backbone.View.extend({
-        initialize: function (opt) {
-            this.router = opt.router;
-            this.links = {};
-            this.articlesCollection = opt.articlesCollection;
-            this.listenTo(this.articlesCollection, 'success', this.updateLinks);
-        },
-        template: _.template(tSideTagsMenu, { variable: 'data' }),
-        render: function () {
-            var curRoute = this.router.current();
-            this.$el.html(this.template({ menuLinks: this.links }));
-            if (curRoute.route === 'section') {
-                this.selectTag(curRoute.params[0]);
-            } else {
-                this.router.navigate('section/all', { trigger: true });
-            }
-            ;
-        },
-        updateLinks: function () {
-            this.links['All'] = 0;
-            _.each(this.articlesCollection.models, function (article) {
-                var tags = article.attributes.tags;
-                _.each(tags, function (tag) {
-                    if (!_.has(this.links, tag)) {
-                        this.links[tag] = 1;
-                    } else {
-                        this.links[tag]++;
-                    }
-                }, this);
-                this.links['All']++;
-            }, this);
-            this.render();
-        },
-        selectTag: function (tag) {
-            $('.menu-link').each(function (i, el) {
-                var elTag = $('.menu-link-tag', el);
-                if (elTag.text().toLowerCase() === tag) {
-                    $('.menu-link').removeClass('is-current');
-                    $(el).addClass('is-current');
-                }
-                ;
-            });
-        }
-    });
-    return SideMenuView;
-});
 define('models/articleModel', [
     'require',
     'exports',
@@ -5014,11 +4957,7 @@ define('models/articleModel', [
             date: '',
             intro: '',
             html: '',
-            tags: [],
-            marks: []
-        },
-        initialize: function () {
-            this.attributes.marks = [];
+            tags: []
         }
     });
     return ArticleModel;
@@ -5027,12 +4966,16 @@ define('collections/articlesCollection', [
     'require',
     'exports',
     'module',
-    'backbone',
     'models/articleModel'
 ], function (require) {
-    var Backbone = require('backbone'), ArticleModel = require('models/articleModel');
+    var ArticleModel = require('models/articleModel');
     var ArticlesCollection = Backbone.Collection.extend({
         model: ArticleModel,
+        initialize: function () {
+            this.on('change', function () {
+                console.log('ArticlesCollection change');
+            });
+        },
         fetchUrl: function (url) {
             this.url = url;
             this.fetch({
@@ -5040,17 +4983,13 @@ define('collections/articlesCollection', [
                     coll.trigger('success');
                 },
                 error: function (coll, res) {
-                    console.log('error fetching ArticlesCollection', res);
+                    console.log('error fetching', coll.articlesCollection.url, '\nresponse:\n', res, '\n------------');
                 },
                 reset: true
-            });
-            this.on('change', function () {
-                console.log('ArticlesCollection change');
             });
         },
         getCids: function (criterion) {
             if (criterion === 'all') {
-                console.log(_.pluck(this.models, 'cid'));
                 return _.pluck(this.models, 'cid');
             } else {
                 var returnCid = _.reduce(this.models, function (memo, model) {
@@ -5074,55 +5013,79 @@ define('collections/articlesCollection', [
     });
     return ArticlesCollection;
 });
-define('src/templates/wrapped/tSideStorageMenu', [], function () {
-    return '<li class="menu-item">\r\n    <a href="#storage/archive" class="menu-link">\r\n        <span class="menu-link-tag">Storage</span>\r\n        <span class="menu-link-counter"><%=data.storageCount%></span>\r\n    </a>\r\n</li>\r\n<li class="menu-item">\r\n    <a href="#storage/trash" class="menu-link">\r\n        <span class="menu-link-tag">Trash</span>\r\n        <span class="menu-link-counter"><%=data.trashCount%></span>\r\n    </a>\r\n</li>';
+define('src/templates/wrapped/tSideTagsMenu', [], function () {
+    return '<ul class="menu-tags">\r\n    <% _.each(data.menuLinks, function(el){ %>\r\n    <li class="menu-item">\r\n        <a href="#section/<%= el[0].toLowerCase() %>" class="menu-link">\r\n            <span class="menu-link-tag"><%=el[0]%></span>\r\n            <span class="menu-link-counter"><%=el[1]%></span>\r\n        </a>\r\n    </li>\r\n    <% }); %>\r\n</ul>';
 });
-define('views/sideMenuStorageView', [
+define('src/templates/wrapped/tSideStorageMenu', [], function () {
+    return '<ul class="menu-storage">\r\n    <li class="menu-item">\r\n        <a href="#storage/trash" class="menu-link menu-link--trash">\r\n            <span class="menu-link-tag">Trash</span>\r\n            <span class="menu-link-counter"><%=data.trashCount%></span>\r\n        </a>\r\n    </li>\r\n</ul>';
+});
+define('views/sideMenuView', [
     'require',
     'exports',
     'module',
-    'backbone',
-    'collections/articlesCollection',
+    'src/templates/wrapped/tSideTagsMenu',
     'src/templates/wrapped/tSideStorageMenu'
 ], function (require) {
-    'use strict';
-    var Backbone = require('backbone'), ArticlesCollection = require('collections/articlesCollection'), tSideStorageMenu = require('src/templates/wrapped/tSideStorageMenu');
-    var SideMenuStorageView = Backbone.View.extend({
+    var tSideTagsMenu = require('src/templates/wrapped/tSideTagsMenu'), tSideStorageMenu = require('src/templates/wrapped/tSideStorageMenu');
+    var SideMenuView = Backbone.View.extend({
         initialize: function (opt) {
             this.router = opt.router;
             this.articlesCollection = opt.articlesCollection;
-            this.articlesStorage = [];
-            this.listenTo(this.articlesCollection, 'success change', function () {
-                this.articlesStorage = this.articlesCollection.getCids('all');
-                this.updateCounters();
-            });
+            this.trashBinCids = opt.trashBinCids, this.links = {};
+            this.selectedSection = '';
+            this.listenTo(this.articlesCollection, 'success', this.updateLinks);
+            this.listenTo(this.articlesCollection, 'movedToTrash', this.updateLinks);
         },
-        template: _.template(tSideStorageMenu, { variable: 'data' }),
+        templateTags: _.template(tSideTagsMenu, { variable: 'data' }),
+        templateStorage: _.template(tSideStorageMenu, { variable: 'data' }),
         render: function () {
-            var rendered = this.template({
-                storageCount: this.storageCount,
-                trashCount: this.trashCount
-            });
-            this.$el.html(rendered);
+            var curRoute = this.router.current(), sortedLinks = _.sortBy(_.pairs(this.links), function (el) {
+                    return el[1];
+                }, this), trashCounter = {};
+            trashCounter.trashCount = this.trashBinCids.length;
+            this.$el.html(this.templateTags({ menuLinks: sortedLinks.reverse() }) + this.templateStorage(trashCounter));
+            if (curRoute.route === 'section') {
+                this.selectTag(curRoute.params[0]);
+            } else {
+                this.router.navigate('section/all', { trigger: true });
+            }
+            ;
         },
-        updateCounters: function () {
-            this.storageCount = 0;
-            this.trashCount = 0;
-            _.each(this.articlesCollection.models, function (el) {
-                var rec = el.attributes;
-                if (_.contains(rec.marks, 'archive')) {
-                    this.storageCount++;
+        updateLinks: function () {
+            this.links = {};
+            this.links['All'] = 0;
+            _.each(this.articlesCollection.models, function (article) {
+                var tags = article.attributes.tags;
+                if (!_.contains(this.trashBinCids, article.cid)) {
+                    _.each(tags, function (tag) {
+                        if (!_.has(this.links, tag)) {
+                            this.links[tag] = 1;
+                        } else {
+                            this.links[tag]++;
+                        }
+                    }, this);
                 }
                 ;
-                if (_.contains(rec.marks, 'trash')) {
-                    this.trashCount++;
-                }
-                ;
+                this.links['All']++;
             }, this);
             this.render();
+        },
+        selectTag: function (tag) {
+            $('.menu-link').each(function (i, el) {
+                var elTag = $('.menu-link-tag', el);
+                if (elTag.text().toLowerCase() === tag) {
+                    $('.menu-link').removeClass('is-current');
+                    $(el).addClass('is-current');
+                }
+                ;
+            });
+        },
+        selectStorage: function (storageClass) {
+            $('.menu-link').removeClass('is-current');
+            $(storageClass).addClass('is-current');
         }
     });
-    return SideMenuStorageView;
+    return SideMenuView;
 });
 define('src/templates/wrapped/tSidebar', [], function () {
     return '';
@@ -5132,63 +5095,75 @@ define('views/sidebarView', [
     'exports',
     'module',
     'backbone',
-    'views/sideMenuTagsView',
-    'views/sideMenuStorageView',
+    'views/sideMenuView',
     'src/templates/wrapped/tSidebar'
 ], function (require) {
-    var Backbone = require('backbone'), SideMenuTagsView = require('views/sideMenuTagsView'), SideMenuStorageView = require('views/sideMenuStorageView'), tSidebar = require('src/templates/wrapped/tSidebar');
+    var Backbone = require('backbone'), SideMenuView = require('views/sideMenuView'), tSidebar = require('src/templates/wrapped/tSidebar');
     var SidebarView = Backbone.View.extend({
         initialize: function (opt) {
-            this.sideMenuTagsView = new SideMenuTagsView({
-                el: this.$('.menu-tags'),
+            this.articlesCollection = opt.articlesCollection;
+            this.router = opt.router;
+            this.sideMenuView = new SideMenuView({
+                el: this.$('.menu'),
                 articlesCollection: opt.articlesCollection,
+                trashBinCids: opt.trashBinCids,
                 router: opt.router
             });
-            this.sideMenuStorageView = new SideMenuStorageView({
-                el: this.$('.menu-storage'),
-                articlesCollection: opt.articlesCollection,
-                router: opt.router
-            });
+            this.listenTo(this.router, 'stateChange', this.renderCurrentState);
         },
         template: _.template(tSidebar),
-        render: function () {
+        renderCurrentState: function (state, id) {
+            switch (state) {
+            case 'article':
+                break;
+            case 'section':
+                this.sideMenuView.selectTag(id);
+                break;
+            case 'storage':
+                this.sideMenuView.selectStorage('.menu-link--trash');
+                break;
+            default:
+                console.warn('unknown state:', state);
+                break;
+            }
+            ;
         }
     });
     return SidebarView;
 });
 define('src/templates/wrapped/tArticle', [], function () {
-    return '<% var rec = data.attributes; %>\r\n<article class="articleCard">\r\n    <h1 class="articleCard-heading"><%=rec.header%></h1>\r\n    <p class="articleCard-info">\r\n        <span class="articleCard-author"><%= rec.author %>,</span>\r\n        <span class="articleCard-date"><%= rec.date %></span>\r\n    </p>\r\n    <div class="articleCard-intro"><%= rec.intro %></div>\r\n    <div class="articleCard-text"><%= rec.html %></div>\r\n    <div class="articleCard-tags">\r\n        <% _.each(rec.tags, function(tag){ %>\r\n            <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n        <% }) %>\r\n    </div>\r\n    <div class="articleCard-btns">\r\n        <button class="articleCard-Btn articleCard-Btn-Close"><i class="icon-cross"></i></button>\r\n        <button class="articleCard-Btn articleCard-Btn-toTrash"><i class="icon-bin2"></i></button>\r\n        <button class="articleCard-Btn articleCard-Btn-toArchive"><i class="icon-box-add"></i></button>\r\n    </div>\r\n</article>';
+    return '<% var rec = data.attributes; %>\r\n<article class="articleCard">\r\n    <h1 class="articleCard-heading"><%=rec.header%></h1>\r\n    <p class="articleCard-info">\r\n        <span class="articleCard-author"><%= rec.author %>,</span>\r\n        <span class="articleCard-date"><%= rec.date %></span>\r\n    </p>\r\n    <div class="articleCard-intro"><%= rec.intro %></div>\r\n    <div class="articleCard-text"><%= rec.html %></div>\r\n    <div class="articleCard-tags">\r\n        <% _.each(rec.tags, function(tag){ %>\r\n            <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n        <% }) %>\r\n    </div>\r\n    <div class="articleCard-btns">\r\n        <button class="articleCard-Btn articleCard-Btn-Close icon-cross"></button>\r\n        <button class="articleCard-Btn articleCard-Btn-toTrash icon-bin2"></button>\r\n    </div>\r\n</article>';
 });
 define('views/articleView', [
     'require',
     'exports',
     'module',
-    'backbone',
     'src/templates/wrapped/tArticle'
 ], function (require) {
-    var Backbone = require('backbone'), tSidebar = require('src/templates/wrapped/tArticle');
+    var tSidebar = require('src/templates/wrapped/tArticle');
     var ArticleView = Backbone.View.extend({
-        events: { 'click .articleCard-Btn-Close': 'closeSingleView' },
-        closeSingleView: function () {
-            var route = $('.menu-link.is-current .menu-link-tag').text();
-            this.router.navigate('section/' + route.toLowerCase(), { trigger: true });
-        },
         initialize: function (opt) {
             this.router = opt.router;
+            this.articlesCollection = opt.articlesCollection;
         },
         template: _.template(tSidebar, { variable: 'data' }),
         render: function () {
             this.$el.html(this.template(this.article));
         },
-        showArticle: function (article) {
-            this.article = article;
+        events: { 'click .articleCard-Btn-Close': 'closeSingleView' },
+        closeSingleView: function () {
+            var route = $('.menu-link.is-current .menu-link-tag').text();
+            this.router.navigate('section/' + route.toLowerCase(), { trigger: true });
+        },
+        showArticle: function (articleModel) {
+            this.article = articleModel;
             this.render();
         }
     });
     return ArticleView;
 });
 define('src/templates/wrapped/tArticlesList', [], function () {
-    return '<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article class="articleCard" data-cid="<%= el.cid %>">\r\n        <h2 class="articleCard-heading"><a href="#article/<%= el.cid %>"><%= rec.header %></a></h2>\r\n        <p class="articleCard-info">\r\n            <span class="articleCard-author"><%= rec.author %>,</span>\r\n            <span class="articleCard-date"><%= rec.date %></span>\r\n        </p>\r\n        <div class="articleCard-intro"><%= rec.intro %></div>\r\n        <div class="articleCard-tags">\r\n            <% _.each(rec.tags, function(tag){ %>\r\n                <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n            <% }) %>\r\n        </div>\r\n        <div class="articleCard-btns">\r\n            <button class="articleCard-Btn articleCard-Btn-mark articleCard-Btn-toTrash" data-action="trash"><i class="icon-bin2"></i></button>\r\n            <button class="articleCard-Btn articleCard-Btn-mark articleCard-Btn-toArchive" data-action="archive"><i class="icon-box-add"></i></button>\r\n        </div>\r\n    </article>\r\n<% }) %>';
+    return '<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article class="articleCard" data-cid="<%= el.cid %>">\r\n        <h2 class="articleCard-heading"><a href="#article/<%= el.cid %>"><%= rec.header %></a></h2>\r\n        <p class="articleCard-info">\r\n            <span class="articleCard-author"><%= rec.author %>,</span>\r\n            <span class="articleCard-date"><%= rec.date %></span>\r\n        </p>\r\n        <div class="articleCard-intro"><%= rec.intro %></div>\r\n        <div class="articleCard-tags">\r\n            <% _.each(rec.tags, function(tag){ %>\r\n                <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n            <% }) %>\r\n        </div>\r\n        <div class="articleCard-btns">\r\n            <button class="articleCard-Btn articleCard-Btn--toTrash icon-bin2"></button>\r\n        </div>\r\n    </article>\r\n<% }) %>';
 });
 define('views/articlesListView', [
     'require',
@@ -5199,24 +5174,32 @@ define('views/articlesListView', [
     var tArticlesList = require('src/templates/wrapped/tArticlesList');
     var ArticlesListView = Backbone.View.extend({
         initialize: function (opt) {
-            this.curTag = 'all';
             this.articlesCollection = opt.articlesCollection;
+            this.trashBinCids = opt.trashBinCids, this.curTag = 'all';
             this.curArticlesCid = [];
             this.listenTo(this.articlesCollection, 'success', this.updateArticlesList);
         },
-        events: { 'click .articleCard-Btn-mark': 'markArticleAs' },
         template: _.template(tArticlesList, { variable: 'data' }),
         render: function () {
             var articlesToRender = _.filter(this.articlesCollection.models, function (model) {
                 return _.contains(this.curArticlesCid, model.cid);
             }, this);
             this.$el.html(this.template({ articles: articlesToRender }));
+            console.log('trashBinCids =', this.trashBinCids);
+            console.log('curArticlesCid =', this.curArticlesCid);
         },
+        renderTrash: function () {
+            var articlesToRender = _.filter(this.articlesCollection.models, function (model) {
+                return _.contains(this.trashBinCids, model.cid);
+            }, this);
+            this.$el.html(this.template({ articles: articlesToRender }));
+        },
+        events: { 'click .articleCard-Btn--toTrash': 'removeToTrash' },
         setCurTag: function (tag) {
             this.curTag = tag;
             this.updateArticlesList();
         },
-        updateArticlesList: function (tag, mark) {
+        updateArticlesList: function (tag) {
             this.curArticlesCid = [];
             if (tag)
                 this.curTag = tag;
@@ -5228,99 +5211,127 @@ define('views/articlesListView', [
                         return el.toLowerCase();
                     });
                     if (tag !== 'all') {
-                        if (_.contains(tags, tag)) {
+                        if (_.contains(tags, tag) && !_.contains(this.trashBinCids, article.cid)) {
                             this.curArticlesCid.push(article.cid);
                         }
                     } else {
-                        this.curArticlesCid.push(article.cid);
-                    }
-                }, this);
-            }
-            ;
-            if (mark) {
-                var filteredCids = this.curArticlesCid;
-                this.curArticlesCid = [];
-                _.each(filteredCids, function (cid) {
-                    if (_.contains(this.articlesCollection.get(cid).attributes.marks, mark)) {
-                        this.curArticlesCid.push(cid);
+                        if (!_.contains(this.trashBinCids, article.cid)) {
+                            this.curArticlesCid.push(article.cid);
+                        }
                     }
                 }, this);
             }
             ;
             this.render();
         },
-        markArticleAs: function (e) {
-            console.log('markArticleAs');
-            var btn = $(e.currentTarget);
-            markAs = btn.data('action'), markCid = btn.parent().parent().data('cid'), marks = this.articlesCollection.get(markCid).attributes.marks;
-            if (!_.contains(marks, markAs)) {
-                marks.push(markAs);
+        setCids: function (cids) {
+            this.curArticlesCid = cids;
+            this.render();
+        },
+        removeToTrash: function (e) {
+            var removedCid = $(e.target).parent().parent().data('cid');
+            if (!_.contains(this.trashBinCids, removedCid)) {
+                this.trashBinCids.push(removedCid);
             }
+            ;
+            this.curArticlesCid = _.without(this.curArticlesCid, removedCid);
+            this.articlesCollection.trigger('movedToTrash');
+            this.render();
         }
     });
     return ArticlesListView;
 });
-define('views/appView', [
+define('views/contentView', [
     'require',
     'exports',
     'module',
-    'backbone',
-    'views/sidebarView',
-    'collections/articlesCollection',
     'views/articleView',
     'views/articlesListView'
 ], function (require) {
-    var Backbone = require('backbone'), SidebarView = require('views/sidebarView'), ArticlesCollection = require('collections/articlesCollection'), ArticleView = require('views/articleView'), ArticlesListView = require('views/articlesListView');
-    var AppView = Backbone.View.extend({
+    var ArticleView = require('views/articleView'), ArticlesListView = require('views/articlesListView');
+    var ContentView = Backbone.View.extend({
         initialize: function (opt) {
+            this.articlesCollection = opt.articlesCollection;
+            this.trashBinCids = opt.trashBinCids;
             this.router = opt.router;
-            this.articlesCollection = new ArticlesCollection();
-            this.articlesCollection.fetchUrl('/json/articles.json');
-            this.initializeNested();
-            this.router.on('stateChange', this.routerStateChangeHandler, this);
+            this.articlesListView = new ArticlesListView({
+                el: $('.articlesContainer'),
+                router: opt.router,
+                articlesCollection: opt.articlesCollection,
+                trashBinCids: opt.trashBinCids
+            });
+            this.articleView = new ArticleView({
+                el: $('.singleArticleContainer'),
+                router: opt.router,
+                articlesCollection: opt.articlesCollection,
+                article: {}
+            });
+            this.listenTo(this.articlesCollection, 'success', function () {
+                this.listenTo(this.articlesCollection, 'add remove reset', function () {
+                    var routerState = this.router.current();
+                    if (routerState.route === 'section') {
+                        this.renderCurrentState('section', routerState.params[0]);
+                    }
+                    ;
+                });
+                this.listenTo(this.router, 'stateChange', this.renderCurrentState);
+            });
         },
-        routerStateChangeHandler: function (state, id) {
+        renderCurrentState: function (state, id) {
             switch (state) {
-            case 'section':
-                this.showView(this.articlesListView);
-                this.sidebarView.sideMenuTagsView.selectTag(id);
-                this.articlesListView.setCurTag(id);
-                break;
             case 'article':
                 this.showView(this.articleView);
                 this.articleView.showArticle(this.articlesCollection.get(id));
                 break;
-            case 'storage':
-                console.log('storage');
+            case 'section':
                 this.showView(this.articlesListView);
-                this.articlesListView.updateArticlesList(false, id);
+                this.articlesListView.setCurTag(id);
+                break;
+            case 'storage':
+                this.showView(this.articlesListView);
+                this.articlesListView.renderTrash();
                 break;
             default:
-                console.log('default');
+                console.warn('unknown state:', state);
                 break;
             }
             ;
-        },
-        initializeNested: function () {
-            this.sidebarView = new SidebarView({
-                el: $('aside'),
-                articlesCollection: this.articlesCollection,
-                router: this.router
-            });
-            this.articlesListView = new ArticlesListView({
-                el: $('.articlesList'),
-                articlesCollection: this.articlesCollection
-            });
-            this.articleView = new ArticleView({
-                el: $('.singleArticleContainer'),
-                article: {},
-                router: this.router
-            });
         },
         showView: function (view) {
             this.articlesListView.$el.removeClass('is-visible');
             this.articleView.$el.removeClass('is-visible');
             view.$el.addClass('is-visible');
+        }
+    });
+    return ContentView;
+});
+define('views/appView', [
+    'require',
+    'exports',
+    'module',
+    'views/sidebarView',
+    'views/contentView'
+], function (require) {
+    var SidebarView = require('views/sidebarView'), ContentView = require('views/contentView');
+    var AppView = Backbone.View.extend({
+        initialize: function (opt) {
+            console.log('---AppView init');
+            this.router = opt.router;
+            this.articlesCollection = opt.articlesCollection;
+            this.trashBinCids = opt.trashBinCids;
+            this.sidebarView = new SidebarView({
+                el: this.$('aside'),
+                articlesCollection: this.articlesCollection,
+                trashBinCids: opt.trashBinCids,
+                router: this.router
+            });
+            this.contentView = new ContentView({
+                el: this.$('main'),
+                articlesCollection: this.articlesCollection,
+                trashBinCids: opt.trashBinCids,
+                router: this.router
+            });
+            console.log('---AppView init end');
         }
     });
     return AppView;
@@ -5376,12 +5387,18 @@ define('app', [
     'exports',
     'module',
     'backbone',
+    'collections/articlesCollection',
     'views/appView',
     'router'
 ], function (require) {
-    var Backbone = require('backbone'), AppView = require('views/appView'), Router = require('router');
-    var router = new Router();
-    appView = new AppView({ router: router });
+    var Backbone = require('backbone'), ArticlesCollection = require('collections/articlesCollection'), AppView = require('views/appView'), Router = require('router');
+    var router = new Router(), articlesCollection = new ArticlesCollection(), trashBinCids = [], appView = new AppView({
+            el: $('body'),
+            articlesCollection: articlesCollection,
+            trashBinCids: trashBinCids,
+            router: router
+        });
+    articlesCollection.fetchUrl('/json/articles.json');
     Backbone.history.start();
 });
 requirejs.config({

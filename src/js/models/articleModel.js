@@ -8,11 +8,7 @@ define(function(require){
             date: '',
             intro: '',
             html: '',
-            tags: [],
-            marks: []
-        },
-        initialize: function() {
-            this.attributes.marks = []
+            tags: []
         }
     });
 

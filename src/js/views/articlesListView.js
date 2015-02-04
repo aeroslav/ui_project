@@ -1,19 +1,15 @@
 define(function(require){
-    var //Backbone = require('backbone'),
-        //ArticlesCollection = require('collections/articlesCollection'),
-        tArticlesList = require('src/templates/wrapped/tArticlesList');
+    var tArticlesList = require('src/templates/wrapped/tArticlesList');
 
     var ArticlesListView = Backbone.View.extend({
 
         initialize: function(opt) {
-            this.curTag = 'all';
             this.articlesCollection = opt.articlesCollection;
+            this.trashBinCids = opt.trashBinCids,
+
+            this.curTag = 'all';
             this.curArticlesCid = [];
             this.listenTo(this.articlesCollection, 'success', this.updateArticlesList);
-        },
-
-        events: {
-            'click .articleCard-Btn-mark': 'markArticleAs'
         },
 
         template: _.template(tArticlesList, {variable: 'data'}),
@@ -23,6 +19,19 @@ define(function(require){
                 return _.contains(this.curArticlesCid, model.cid);
             }, this);
             this.$el.html(this.template({ articles: articlesToRender }));
+            console.log('trashBinCids =', this.trashBinCids);
+            console.log('curArticlesCid =', this.curArticlesCid);
+        },
+
+        renderTrash: function() {
+            var articlesToRender = _.filter(this.articlesCollection.models, function(model) {
+                return _.contains(this.trashBinCids, model.cid);
+            }, this);
+            this.$el.html(this.template({ articles: articlesToRender }));
+        },
+
+        events: {
+            'click .articleCard-Btn--toTrash': 'removeToTrash'
         },
 
         setCurTag: function(tag) {
@@ -30,7 +39,7 @@ define(function(require){
             this.updateArticlesList();
         },
 
-        updateArticlesList: function(tag, mark) {
+        updateArticlesList: function(tag) {
             this.curArticlesCid = [];
             if (tag) this.curTag = tag
             else tag = this.curTag;
@@ -41,20 +50,13 @@ define(function(require){
                         return el.toLowerCase();
                     });
                     if (tag !== 'all') {
-                        if (_.contains(tags, tag)) {
+                        if (_.contains(tags, tag) && !(_.contains(this.trashBinCids, article.cid)) ) {
                             this.curArticlesCid.push(article.cid);
                         }
                     } else {
-                        this.curArticlesCid.push(article.cid);
-                    }
-                }, this);
-            };
-            if (mark) {
-                var filteredCids = this.curArticlesCid;
-                this.curArticlesCid = [];
-                _.each(filteredCids, function(cid) {
-                    if ( _.contains(this.articlesCollection.get(cid).attributes.marks, mark) ) {
-                        this.curArticlesCid.push(cid);
+                        if ( !( _.contains(this.trashBinCids, article.cid) )) {
+                            this.curArticlesCid.push(article.cid);
+                        }
                     }
                 }, this);
             };
@@ -62,15 +64,19 @@ define(function(require){
             this.render();
         },
 
-        markArticleAs: function(e) {
-            console.log('markArticleAs');
-            var btn = $(e.currentTarget);
-                markAs = btn.data('action'),
-                markCid = btn.parent().parent().data('cid'),
-                marks = this.articlesCollection.get(markCid).attributes.marks;
-            if ( !(_.contains(marks, markAs)) ) {
-                marks.push(markAs);
-            }
+        setCids: function(cids) {
+            this.curArticlesCid = cids;
+            this.render();
+        },
+
+        removeToTrash: function(e) {
+            var removedCid = $(e.target).parent().parent().data('cid');
+            if ( !(_.contains(this.trashBinCids, removedCid)) ) {
+                this.trashBinCids.push(removedCid);
+            };
+            this.curArticlesCid = _.without(this.curArticlesCid, removedCid);
+            this.articlesCollection.trigger('movedToTrash');
+            this.render();
         }
     });
 

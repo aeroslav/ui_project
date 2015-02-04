@@ -13,8 +13,7 @@
             <% }) %>
         </div>
         <div class="articleCard-btns">
-            <button class="articleCard-Btn articleCard-Btn-mark articleCard-Btn-toTrash" data-action="trash"><i class="icon-bin2"></i></button>
-            <button class="articleCard-Btn articleCard-Btn-mark articleCard-Btn-toArchive" data-action="archive"><i class="icon-box-add"></i></button>
+            <button class="articleCard-Btn articleCard-Btn--toTrash icon-bin2"></button>
         </div>
     </article>
 <% }) %>

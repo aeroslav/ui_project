@@ -1,8 +1,18 @@
 define(function(require){
-    var Backbone = require('backbone'),
-        tSidebar = require('src/templates/wrapped/tArticle');
+    var tSidebar = require('src/templates/wrapped/tArticle');
 
     var ArticleView = Backbone.View.extend({
+
+        initialize: function(opt) {
+            this.router = opt.router;
+            this.articlesCollection = opt.articlesCollection;
+        },
+
+        template: _.template(tSidebar, {variable: 'data'}),
+
+        render: function() {
+            this.$el.html(this.template(this.article));
+        },
 
         events: {
             'click .articleCard-Btn-Close': 'closeSingleView'
@@ -13,18 +23,8 @@ define(function(require){
             this.router.navigate('section/'+route.toLowerCase(), { trigger: true });
         },
 
-        initialize: function(opt) {
-            this.router = opt.router;
-        },
-
-        template: _.template(tSidebar, {variable: 'data'}),
-
-        render: function() {
-            this.$el.html(this.template(this.article));
-        },
-
-        showArticle: function(article) {
-            this.article = article;
+        showArticle: function(articleModel) {
+            this.article = articleModel;
             this.render();
         }
     });

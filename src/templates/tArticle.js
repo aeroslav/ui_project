@@ -13,8 +13,7 @@
         <% }) %>
     </div>
     <div class="articleCard-btns">
-        <button class="articleCard-Btn articleCard-Btn-Close"><i class="icon-cross"></i></button>
-        <button class="articleCard-Btn articleCard-Btn-toTrash"><i class="icon-bin2"></i></button>
-        <button class="articleCard-Btn articleCard-Btn-toArchive"><i class="icon-box-add"></i></button>
+        <button class="articleCard-Btn articleCard-Btn-Close icon-cross"></button>
+        <button class="articleCard-Btn articleCard-Btn-toTrash icon-bin2"></button>
     </div>
 </article>
