@@ -7,8 +7,12 @@ define(function(require){
             author: '',
             date: '',
             intro: '',
-            html: '',
+            text: '',
             tags: []
+        },
+
+        initialize: function(opt) {
+            this.attributes.intro = opt.text.split('<hr>')[0];
         }
     });
 

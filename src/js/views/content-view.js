@@ -1,23 +1,24 @@
 define(function(require){
-    var ArticleView = require('views/articleView'),
-        ArticlesListView = require('views/articlesListView');
+    var ArticleView = require('views/article-view'),
+        ArticlesListView = require('views/articlesList-view');
 
     var ContentView = Backbone.View.extend({
         initialize: function(opt) {
             this.articlesCollection = opt.articlesCollection;
-            this.trashBinCids = opt.trashBinCids;
+            this.trashBinIds = opt.trashBinIds;
             this.router = opt.router;
 
             this.articlesListView = new ArticlesListView({
                 el: $('.articlesContainer'),
                 router: opt.router,
                 articlesCollection: opt.articlesCollection,
-                trashBinCids: opt.trashBinCids,
+                trashBinIds: opt.trashBinIds,
             });
             this.articleView = new ArticleView({
                 el: $('.singleArticleContainer'),
                 router: opt.router,
                 articlesCollection: opt.articlesCollection,
+                trashBinIds: opt.trashBinIds,
                 article: {}
             });
 
@@ -28,28 +29,7 @@ define(function(require){
                         this.renderCurrentState('section', routerState.params[0]);
                     };
                 });
-                this.listenTo(this.router, 'stateChange', this.renderCurrentState);
             });
-        },
-
-        renderCurrentState: function(state, id) {
-            switch (state) {
-                case 'article':
-                    this.showView(this.articleView);
-                    this.articleView.showArticle(this.articlesCollection.get(id));
-                    break;
-                case 'section':
-                    this.showView(this.articlesListView);
-                    this.articlesListView.setCurTag(id);
-                    break;
-                case 'storage':
-                    this.showView(this.articlesListView);
-                    this.articlesListView.renderTrash();
-                    break;
-                default:
-                    console.warn('unknown state:', state);
-                    break;
-            };
         },
 
         showView: function(view) {

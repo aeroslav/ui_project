@@ -11,22 +11,6 @@ define(function(require){
             'storage/:storage': 'storage',
         },
 
-        start: function () {
-            this.trigger('stateChange', 'start', '/');
-        },
-
-        section: function(id) {
-            this.trigger('stateChange', 'section', id);
-        },
-
-        article: function(articleId) {
-            this.trigger('stateChange', 'article', articleId);
-        },
-
-        storage: function(id) {
-            this.trigger('stateChange', 'storage', id);
-        },
-
         current : function() {
             var Router = this,
                 fragment = Backbone.history.fragment,

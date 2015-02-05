@@ -1,7 +1,7 @@
 <% _.each(data.articles, function(el){
     var rec = el.attributes; %>
-    <article class="articleCard" data-cid="<%= el.cid %>">
-        <h2 class="articleCard-heading"><a href="#article/<%= el.cid %>"><%= rec.header %></a></h2>
+    <article class="articleCard" data-id="<%= el.id %>">
+        <h2 class="articleCard-heading"><a href="#article/<%= el.id %>"><%= rec.header %></a></h2>
         <p class="articleCard-info">
             <span class="articleCard-author"><%= rec.author %>,</span>
             <span class="articleCard-date"><%= rec.date %></span>
@@ -13,7 +13,7 @@
             <% }) %>
         </div>
         <div class="articleCard-btns">
-            <button class="articleCard-Btn articleCard-Btn--toTrash icon-bin2"></button>
+            <button class="articleCard-Btn articleCard-Btn--trash <%= (data.isTrash)?'icon-redo2':'icon-bin2' %>"></button>
         </div>
     </article>
 <% }) %>
