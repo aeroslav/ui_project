@@ -1,5 +1,5 @@
 define(function(require){
-    var tSidebar = require('src/templates/wrapped/tArticle');
+    var articleTpl = require('src/templates/wrapped/article-tpl');
 
     var ArticleView = Backbone.View.extend({
 
@@ -11,44 +11,67 @@ define(function(require){
             this.prevRoute = '';
         },
 
-        template: _.template(tSidebar, {variable: 'data'}),
-
-        render: function() {
-            var isTrash = false;
-            if ( _.contains(this.trashBinIds, this.article.id) ) isTrash = true;
-
-            this.$el.html(this.template({
-                article: this.article,
-                isTrash: isTrash
-            }));
-        },
+        template: _.template(articleTpl, {variable: 'data'}),
 
         events: {
-            'click .articleCard-Btn-close': 'closeSingleView',
-            'click .articleCard-Btn-trash': 'deleteFromSingleView'
+            'click .article-card-Btn-close': 'closeSingleView',
+            'click .article-card-Btn-trash': 'deleteFromSingleView'
         },
 
-        closeSingleView: function() {
-            var routeId = $('.menu-link.is-current .menu-link-tag').text();
-            if (!routeId) routeId = 'all';
-            this.router.navigate((this.prevRoute)?(this.prevRoute):('section')+'/'+routeId.toLowerCase(), { trigger: true });
+        closeSingleView: function(e) {
+            var articleCard = $(e.target).closest('.article-card'),
+                routeId = $('.menu-link.is-current .menu-link-tag').text(),
+                closeAnimComplete = (function() {
+                    var routeToNav = (this.prevRoute)?(this.prevRoute):('section')+'/'+routeId.toLowerCase();
+                    this.router.navigate(routeToNav, { trigger: true });
+                }).bind(this) 
+
+            articleCard.animate({
+                    'margin-top': 0,
+                    'margin-bottom': 0,
+                    'height': 0,
+                    'opacity': 0
+                },{
+                    duration: 200,
+                    easing: 'swing',
+                    complete: closeAnimComplete
+            });
+            if (!routeId) {
+                routeId = 'all'
+            };
         },
 
         deleteFromSingleView: function(e) {
-            var removedId = this.$(e.target).parent().parent().data('id').toString();
-            if ( !(_.contains(this.trashBinIds, removedId)) ) {
+            var removedId = this.$(e.target).closest('.article-card').data('id').toString(),
+                isNotAlreadyInTrash = !( _.contains(this.trashBinIds, removedId) );
+
+            if ( isNotAlreadyInTrash ) {
                 this.trashBinIds.push(removedId);
                 this.articlesCollection.trigger('movedTrash');
             } else {
                 this.trashBinIds.splice(this.trashBinIds.indexOf(removedId), 1);
                 this.articlesCollection.trigger('movedTrash');
             }
-            this.closeSingleView();
+            this.closeSingleView(e);
         },
 
         showArticle: function(articleModel) {
             this.article = articleModel;
             this.render();
+        },
+
+        render: function() {
+            var isCurArticleInTrash = _.contains(this.trashBinIds, this.article.id);
+            if (isCurArticleInTrash) {
+                isTrash = true;
+            } else {
+                isTrash = false;
+            };
+
+            this.$el.html(this.template({
+                article: this.article,
+                isTrash: isTrash
+            }));
         }
     });
 

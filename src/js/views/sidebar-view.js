@@ -1,7 +1,7 @@
 define(function(require){
     var Backbone = require('backbone'),
-        SideMenuView = require('views/sidemenu-view'),
-        tSidebar = require('src/templates/wrapped/tSidebar');
+        SideMenuView = require('views/sidemenu-view');
+        //sidebarTemplate = require('src/templates/wrapped/sidebar-tpl');
 
     var SidebarView = Backbone.View.extend({
         initialize: function(opt) {
@@ -14,9 +14,7 @@ define(function(require){
                 trashBinIds: opt.trashBinIds,
                 router: opt.router
             });
-        },
-
-        template: _.template(tSidebar)
+        }
 
     });
 

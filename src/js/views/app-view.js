@@ -23,17 +23,6 @@ define(function(require){
                 });
 
                 this.listenTo(this.router, 'route', this.routeHandler);
-
-                $('.logo').click(this.checkTrash.bind(this));
-            },
-
-            checkTrash: function() {
-                console.log('--- check trashBinIds ---');
-                console.log('AppView ', this.trashBinIds);
-                console.log('SideMenuView ', this.sidebarView.sideMenuView.trashBinIds);
-                console.log('ArticlesListView', this.contentView.articlesListView.trashBinIds);
-                console.log('ArticleView', this.contentView.articleView.trashBinIds);
-                console.log('=== check trashBinIds ===');
             },
 
             routeHandler: function(state, params) {
@@ -53,6 +42,7 @@ define(function(require){
                         };
                         break;
                     case 'storage':
+                    var storageClass = '.menu-link-' + params[0];
                         this.contentView.articleView.prevRoute = 'storage/' + params[0];
                         this.contentView.showView(this.contentView.articlesListView);
                         if (params[0] === 'trash') {
@@ -60,7 +50,7 @@ define(function(require){
                         } else {
                             this.router.navigate('storage/trash', {trigger: true});
                         };
-                        this.sidebarView.sideMenuView.selectStorage('.menu-link--' + params[0]);
+                        this.sidebarView.sideMenuView.selectStorage(storageClass);
                         break;
                     default:
                         console.log('redirect to default route');

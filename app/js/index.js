@@ -4994,20 +4994,20 @@ define('collections/articles-collection', [
     });
     return ArticlesCollection;
 });
-define('src/templates/wrapped/tSideTagsMenu', [], function () {
+define('src/templates/wrapped/side-tags-menu-tpl', [], function () {
     return '<ul class="menu-tags">\r\n    <% _.each(data.menuLinks, function(el){ %>\r\n    <li class="menu-item">\r\n        <a href="#section/<%= el[0].toLowerCase() %>" class="menu-link">\r\n            <span class="menu-link-tag"><%=el[0]%></span>\r\n            <span class="menu-link-counter"><%=el[1]%></span>\r\n        </a>\r\n    </li>\r\n    <% }); %>\r\n</ul>';
 });
-define('src/templates/wrapped/tSideStorageMenu', [], function () {
-    return '<ul class="menu-storage">\r\n    <li class="menu-item">\r\n        <a href="#storage/trash" class="menu-link menu-link--trash">\r\n            <span class="menu-link-tag">Trash</span>\r\n            <span class="menu-link-counter"><%=data.trashCount%></span>\r\n        </a>\r\n    </li>\r\n</ul>';
+define('src/templates/wrapped/side-storage-menu-tpl', [], function () {
+    return '<ul class="menu-storage">\r\n    <li class="menu-item">\r\n        <a href="#storage/trash" class="menu-link menu-link-trash">\r\n            <span class="menu-link-tag">Trash</span>\r\n            <span class="menu-link-counter"><%=data.trashCount%></span>\r\n        </a>\r\n    </li>\r\n</ul>';
 });
 define('views/sidemenu-view', [
     'require',
     'exports',
     'module',
-    'src/templates/wrapped/tSideTagsMenu',
-    'src/templates/wrapped/tSideStorageMenu'
+    'src/templates/wrapped/side-tags-menu-tpl',
+    'src/templates/wrapped/side-storage-menu-tpl'
 ], function (require) {
-    var tSideTagsMenu = require('src/templates/wrapped/tSideTagsMenu'), tSideStorageMenu = require('src/templates/wrapped/tSideStorageMenu');
+    var sideTagsMenuTpl = require('src/templates/wrapped/side-tags-menu-tpl'), sideStorageMenu = require('src/templates/wrapped/side-storage-menu-tpl');
     var SideMenuView = Backbone.View.extend({
         initialize: function (opt) {
             this.router = opt.router;
@@ -5015,36 +5015,16 @@ define('views/sidemenu-view', [
             this.trashBinIds = opt.trashBinIds;
             this.links = {};
             this.selectedSection = '';
-            this.listenTo(this.articlesCollection, 'success', function () {
-                this.updateLinks();
-            });
-            this.listenTo(this.articlesCollection, 'movedTrash', this.updateLinks);
+            this.listenTo(this.articlesCollection, 'success movedTrash add remove reset', this.updateLinks);
         },
-        templateTags: _.template(tSideTagsMenu, { variable: 'data' }),
-        templateStorage: _.template(tSideStorageMenu, { variable: 'data' }),
-        render: function () {
-            var curRoute = this.router.current(), sortedLinks = _.sortBy(_.pairs(this.links), function (el) {
-                    return el[1];
-                }, this), trashCounter = {}, curRoute = this.router.current();
-            trashCounter.trashCount = this.trashBinIds.length;
-            this.$el.html(this.templateTags({ menuLinks: sortedLinks.reverse() }) + this.templateStorage(trashCounter));
-            switch (curRoute.route) {
-            case 'section':
-                if (curRoute.params[0])
-                    this.selectTag(curRoute.params[0]);
-                break;
-            case 'storage':
-                if (curRoute.params[0])
-                    this.selectStorage('.menu-link--' + curRoute.params[0]);
-                break;
-            }
-        },
+        templateTags: _.template(sideTagsMenuTpl, { variable: 'data' }),
+        templateStorage: _.template(sideStorageMenu, { variable: 'data' }),
         updateLinks: function () {
             this.links = {};
             this.links['All'] = 0;
-            _.each(this.articlesCollection.models, function (article) {
-                var tags = article.attributes.tags;
-                if (!_.contains(this.trashBinIds, article.id)) {
+            this.articlesCollection.each(function (article) {
+                var tags = article.attributes.tags, isArticleNotInTrash = !_.contains(this.trashBinIds, article.id);
+                if (isArticleNotInTrash) {
                     _.each(tags, function (tag) {
                         if (!_.has(this.links, tag)) {
                             this.links[tag] = 1;
@@ -5071,22 +5051,36 @@ define('views/sidemenu-view', [
         selectStorage: function (storageClass) {
             $('.menu-link').removeClass('is-current');
             $(storageClass).addClass('is-current');
+        },
+        render: function () {
+            var curRoute = this.router.current(), sortedLinks = _.sortBy(_.pairs(this.links), function (el) {
+                    return el[1];
+                }, this), trashCounter = {}, curRoute = this.router.current();
+            trashCounter.trashCount = this.trashBinIds.length;
+            this.$el.html(this.templateTags({ menuLinks: sortedLinks.reverse() }) + this.templateStorage(trashCounter));
+            switch (curRoute.route) {
+            case 'section':
+                if (curRoute.params[0])
+                    this.selectTag(curRoute.params[0]);
+                break;
+            case 'storage':
+                var storageClass = '.menu-link-' + curRoute.params[0];
+                if (curRoute.params[0])
+                    this.selectStorage(storageClass);
+                break;
+            }
         }
     });
     return SideMenuView;
-});
-define('src/templates/wrapped/tSidebar', [], function () {
-    return '';
 });
 define('views/sidebar-view', [
     'require',
     'exports',
     'module',
     'backbone',
-    'views/sidemenu-view',
-    'src/templates/wrapped/tSidebar'
+    'views/sidemenu-view'
 ], function (require) {
-    var Backbone = require('backbone'), SideMenuView = require('views/sidemenu-view'), tSidebar = require('src/templates/wrapped/tSidebar');
+    var Backbone = require('backbone'), SideMenuView = require('views/sidemenu-view');
     var SidebarView = Backbone.View.extend({
         initialize: function (opt) {
             this.articlesCollection = opt.articlesCollection;
@@ -5097,21 +5091,20 @@ define('views/sidebar-view', [
                 trashBinIds: opt.trashBinIds,
                 router: opt.router
             });
-        },
-        template: _.template(tSidebar)
+        }
     });
     return SidebarView;
 });
-define('src/templates/wrapped/tArticle', [], function () {
-    return '<% var rec = data.article.attributes; %>\r\n<article class="articleCard" data-id="<%= data.article.id %>">\r\n    <h1 class="articleCard-heading"><%=rec.header%></h1>\r\n    <p class="articleCard-info">\r\n        <span class="articleCard-author"><%= rec.author %>,</span>\r\n        <span class="articleCard-date"><%= rec.date %></span>\r\n    </p>\r\n    <div class="articleCard-text"><%= rec.text %></div>\r\n    <div class="articleCard-tags">\r\n        <% _.each(rec.tags, function(tag){ %>\r\n            <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n        <% }) %>\r\n    </div>\r\n    <div class="articleCard-btns">\r\n        <button class="articleCard-Btn articleCard-Btn-close icon-cross"></button>\r\n        <button class="articleCard-Btn articleCard-Btn-trash <%= (data.isTrash)?\'icon-redo2\':\'icon-bin2\' %>"></button>\r\n    </div>\r\n</article>';
+define('src/templates/wrapped/article-tpl', [], function () {
+    return '<% var rec = data.article.attributes; %>\r\n<article class="article-card" data-id="<%= data.article.id %>">\r\n    <header class="article-card-header">\r\n        <h1 class="article-card-heading"><%=rec.header%></h1>\r\n        <div class="article-card-btns">\r\n            <button class="article-card-Btn article-card-Btn-close icon-cross"></button>\r\n            <button class="article-card-Btn article-card-Btn-trash <%= (data.isTrash) ? \'icon-redo2\' : \'icon-bin2\' %>"></button>\r\n        </div>\r\n    </header>\r\n    <p class="article-card-info">\r\n        <span class="article-card-author"><%= rec.author %>,</span>\r\n        <span class="article-card-date"><%= rec.date %></span>\r\n    </p>\r\n    <div class="article-card-text"><%= rec.text %></div>\r\n    <div class="article-card-tags">\r\n        <% _.each(rec.tags, function(tag){ %>\r\n            <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n        <% }) %>\r\n    </div>\r\n</article>';
 });
 define('views/article-view', [
     'require',
     'exports',
     'module',
-    'src/templates/wrapped/tArticle'
+    'src/templates/wrapped/article-tpl'
 ], function (require) {
-    var tSidebar = require('src/templates/wrapped/tArticle');
+    var articleTpl = require('src/templates/wrapped/article-tpl');
     var ArticleView = Backbone.View.extend({
         initialize: function (opt) {
             this.router = opt.router;
@@ -5119,54 +5112,72 @@ define('views/article-view', [
             this.trashBinIds = opt.trashBinIds;
             this.prevRoute = '';
         },
-        template: _.template(tSidebar, { variable: 'data' }),
-        render: function () {
-            var isTrash = false;
-            if (_.contains(this.trashBinIds, this.article.id))
-                isTrash = true;
-            this.$el.html(this.template({
-                article: this.article,
-                isTrash: isTrash
-            }));
-        },
+        template: _.template(articleTpl, { variable: 'data' }),
         events: {
-            'click .articleCard-Btn-close': 'closeSingleView',
-            'click .articleCard-Btn-trash': 'deleteFromSingleView'
+            'click .article-card-Btn-close': 'closeSingleView',
+            'click .article-card-Btn-trash': 'deleteFromSingleView'
         },
-        closeSingleView: function () {
-            var routeId = $('.menu-link.is-current .menu-link-tag').text();
-            if (!routeId)
+        closeSingleView: function (e) {
+            var articleCard = $(e.target).closest('.article-card'), routeId = $('.menu-link.is-current .menu-link-tag').text(), closeAnimComplete = function () {
+                    var routeToNav = this.prevRoute ? this.prevRoute : 'section' + '/' + routeId.toLowerCase();
+                    this.router.navigate(routeToNav, { trigger: true });
+                }.bind(this);
+            articleCard.animate({
+                'margin-top': 0,
+                'margin-bottom': 0,
+                'height': 0,
+                'opacity': 0
+            }, {
+                duration: 200,
+                easing: 'swing',
+                complete: closeAnimComplete
+            });
+            if (!routeId) {
                 routeId = 'all';
-            this.router.navigate(this.prevRoute ? this.prevRoute : 'section' + '/' + routeId.toLowerCase(), { trigger: true });
+            }
+            ;
         },
         deleteFromSingleView: function (e) {
-            var removedId = this.$(e.target).parent().parent().data('id').toString();
-            if (!_.contains(this.trashBinIds, removedId)) {
+            var removedId = this.$(e.target).closest('.article-card').data('id').toString(), isNotAlreadyInTrash = !_.contains(this.trashBinIds, removedId);
+            if (isNotAlreadyInTrash) {
                 this.trashBinIds.push(removedId);
                 this.articlesCollection.trigger('movedTrash');
             } else {
                 this.trashBinIds.splice(this.trashBinIds.indexOf(removedId), 1);
                 this.articlesCollection.trigger('movedTrash');
             }
-            this.closeSingleView();
+            this.closeSingleView(e);
         },
         showArticle: function (articleModel) {
             this.article = articleModel;
             this.render();
+        },
+        render: function () {
+            var isCurArticleInTrash = _.contains(this.trashBinIds, this.article.id);
+            if (isCurArticleInTrash) {
+                isTrash = true;
+            } else {
+                isTrash = false;
+            }
+            ;
+            this.$el.html(this.template({
+                article: this.article,
+                isTrash: isTrash
+            }));
         }
     });
     return ArticleView;
 });
-define('src/templates/wrapped/tArticlesList', [], function () {
-    return '<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article class="articleCard" data-id="<%= el.id %>">\r\n        <h2 class="articleCard-heading"><a href="#article/<%= el.id %>"><%= rec.header %></a></h2>\r\n        <p class="articleCard-info">\r\n            <span class="articleCard-author"><%= rec.author %>,</span>\r\n            <span class="articleCard-date"><%= rec.date %></span>\r\n        </p>\r\n        <div class="articleCard-intro"><%= rec.intro %></div>\r\n        <div class="articleCard-tags">\r\n            <% _.each(rec.tags, function(tag){ %>\r\n                <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n            <% }) %>\r\n        </div>\r\n        <div class="articleCard-btns">\r\n            <button class="articleCard-Btn articleCard-Btn--trash <%= (data.isTrash)?\'icon-redo2\':\'icon-bin2\' %>"></button>\r\n        </div>\r\n    </article>\r\n<% }) %>';
+define('src/templates/wrapped/articles-list-tpl', [], function () {
+    return '<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article class="article-card" data-id="<%= el.id %>">\r\n        <h2 class="article-card-heading"><a href="#article/<%= el.id %>"><%= rec.header %></a></h2>\r\n        <p class="article-card-info">\r\n            <span class="article-card-author"><%= rec.author %>,</span>\r\n            <span class="article-card-date"><%= rec.date %></span>\r\n        </p>\r\n        <div class="article-card-intro"><%= rec.intro %></div>\r\n        <div class="article-card-tags">\r\n            <% _.each(rec.tags, function(tag){ %>\r\n                <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n            <% }) %>\r\n        </div>\r\n        <div class="article-card-btns">\r\n            <button class="article-card-Btn article-card-Btn-trash <%= (data.isTrash)?\'icon-redo2\':\'icon-bin2\' %>"></button>\r\n        </div>\r\n    </article>\r\n<% }) %>';
 });
 define('views/articlesList-view', [
     'require',
     'exports',
     'module',
-    'src/templates/wrapped/tArticlesList'
+    'src/templates/wrapped/articles-list-tpl'
 ], function (require) {
-    var tArticlesList = require('src/templates/wrapped/tArticlesList');
+    var articlesListTpl = require('src/templates/wrapped/articles-list-tpl');
     var ArticlesListView = Backbone.View.extend({
         initialize: function (opt) {
             this.router = opt.router;
@@ -5175,18 +5186,9 @@ define('views/articlesList-view', [
             this.curArticlesIds = [];
             this.listenTo(this.articlesCollection, 'success', this.updateArticlesList);
         },
-        template: _.template(tArticlesList, { variable: 'data' }),
-        render: function () {
-            var articlesToRender = _.filter(this.articlesCollection.models, function (model) {
-                return _.contains(this.curArticlesIds, model.id);
-            }, this);
-            this.$el.html(this.template({
-                articles: articlesToRender,
-                isTrash: false
-            }));
-        },
+        template: _.template(articlesListTpl, { variable: 'data' }),
         renderTrash: function () {
-            var articlesToRender = _.filter(this.articlesCollection.models, function (model) {
+            var articlesToRender = this.articlesCollection.filter(function (model) {
                 return _.contains(this.trashBinIds, model.id);
             }, this);
             this.$el.html(this.template({
@@ -5194,7 +5196,7 @@ define('views/articlesList-view', [
                 isTrash: true
             }));
         },
-        events: { 'click .articleCard-Btn--trash': 'removeToTrash' },
+        events: { 'click .article-card-Btn-trash': 'removeToTrash' },
         setCurTag: function (tag) {
             this.curTag = tag;
             this.updateArticlesList();
@@ -5207,36 +5209,62 @@ define('views/articlesList-view', [
                 tag = this.curTag;
             }
             ;
-            _.each(this.articlesCollection.models, function (article) {
+            this.articlesCollection.each(function (article) {
                 var tags = _.map(article.attributes.tags, function (el) {
                     return el.toLowerCase();
                 });
-                if (tag !== 'all') {
-                    if (_.contains(tags, tag) && !_.contains(this.trashBinIds, article.id)) {
-                        this.curArticlesIds.push(article.id);
-                    }
-                } else {
-                    if (!_.contains(this.trashBinIds, article.id)) {
-                        this.curArticlesIds.push(article.id);
-                    }
+                var isTagFits = _.contains(tags, tag), isNotInTrashAlready = !_.contains(this.trashBinIds, article.id), isArticleIdPushTo = tag !== 'all' ? isTagFits && isNotInTrashAlready : isNotInTrashAlready;
+                if (isArticleIdPushTo) {
+                    this.curArticlesIds.push(article.id);
                 }
             }, this);
             this.render();
         },
         removeToTrash: function (e) {
-            var removedId = $(e.target).parent().parent().data('id').toString();
+            var removedId = $(e.target).closest('.article-card').data('id').toString(), removeAnimComplete = function (isListToRender) {
+                    return function () {
+                        this.articlesCollection.trigger('movedTrash');
+                        if (isListToRender) {
+                            this.render();
+                        } else {
+                            this.renderTrash();
+                        }
+                        ;
+                    }.bind(this);
+                }.bind(this), hideArticle = function (e, isListToRender) {
+                    var articleCard = $(e.target).closest('.article-card');
+                    articleCard.animate({
+                        'margin-top': 0,
+                        'margin-bottom': 0,
+                        'height': 0,
+                        'opacity': 0
+                    }, {
+                        duration: 200,
+                        easing: 'swing',
+                        complete: removeAnimComplete(isListToRender)
+                    });
+                };
             if (!_.contains(this.trashBinIds, removedId)) {
                 this.trashBinIds.push(removedId);
                 this.curArticlesIds = _.without(this.curArticlesIds, removedId);
                 this.articlesCollection.trigger('movedTrash');
-                this.render();
+                hideArticle(e, true);
             } else {
                 this.curArticlesIds.push(removedId);
                 this.trashBinIds.splice(this.trashBinIds.indexOf(removedId), 1);
                 this.articlesCollection.trigger('movedTrash');
-                this.renderTrash();
+                hideArticle(e, false);
             }
             ;
+        },
+        render: function () {
+            var articlesToRender = this.articlesCollection.filter(function (model) {
+                return _.contains(this.curArticlesIds, model.id);
+            }, this);
+            this.$el.html(this.template({
+                articles: articlesToRender,
+                isTrash: false
+            }));
         }
     });
     return ArticlesListView;
@@ -5255,27 +5283,26 @@ define('views/content-view', [
             this.trashBinIds = opt.trashBinIds;
             this.router = opt.router;
             this.articlesListView = new ArticlesListView({
-                el: $('.articlesContainer'),
+                el: $('.articles-container'),
                 router: opt.router,
                 articlesCollection: opt.articlesCollection,
                 trashBinIds: opt.trashBinIds
             });
             this.articleView = new ArticleView({
-                el: $('.singleArticleContainer'),
+                el: $('.single-article-container'),
                 router: opt.router,
                 articlesCollection: opt.articlesCollection,
                 trashBinIds: opt.trashBinIds,
                 article: {}
             });
-            this.listenTo(this.articlesCollection, 'success', function () {
-                this.listenTo(this.articlesCollection, 'add remove reset', function () {
-                    var routerState = this.router.current();
-                    if (routerState.route === 'section') {
-                        this.renderCurrentState('section', routerState.params[0]);
-                    }
-                    ;
-                });
-            });
+            this.listenTo(this.articlesCollection, 'success add remove reset', this.articleCollEventHandler);
+        },
+        articleCollEventHandler: function () {
+            var routerState = this.router.current();
+            if (routerState.route === 'section') {
+                this.renderCurrentState('section', routerState.params[0]);
+            }
+            ;
         },
         showView: function (view) {
             this.articlesListView.$el.removeClass('is-visible');
@@ -5311,15 +5338,6 @@ define('views/app-view', [
                 router: this.router
             });
             this.listenTo(this.router, 'route', this.routeHandler);
-            $('.logo').click(this.checkTrash.bind(this));
-        },
-        checkTrash: function () {
-            console.log('--- check trashBinIds ---');
-            console.log('AppView ', this.trashBinIds);
-            console.log('SideMenuView ', this.sidebarView.sideMenuView.trashBinIds);
-            console.log('ArticlesListView', this.contentView.articlesListView.trashBinIds);
-            console.log('ArticleView', this.contentView.articleView.trashBinIds);
-            console.log('=== check trashBinIds ===');
         },
         routeHandler: function (state, params) {
             switch (state) {
@@ -5339,6 +5357,7 @@ define('views/app-view', [
                 ;
                 break;
             case 'storage':
+                var storageClass = '.menu-link-' + params[0];
                 this.contentView.articleView.prevRoute = 'storage/' + params[0];
                 this.contentView.showView(this.contentView.articlesListView);
                 if (params[0] === 'trash') {
@@ -5347,7 +5366,7 @@ define('views/app-view', [
                     this.router.navigate('storage/trash', { trigger: true });
                 }
                 ;
-                this.sidebarView.sideMenuView.selectStorage('.menu-link--' + params[0]);
+                this.sidebarView.sideMenuView.selectStorage(storageClass);
                 break;
             default:
                 console.log('redirect to default route');

@@ -127,7 +127,7 @@ main {
     color: @c-green;
     transition: color, border-color .2s ease-out;
 }
-.articlesContainer, .singleArticleContainer {
+.articles-container, .single-article-container {
     height: 0;
     overflow: hidden;
     &.is-visible {
@@ -135,40 +135,50 @@ main {
         overflow-y: scroll;
     }
 }
-.articleCard {
+.article-card {
     max-width: 900px;
     padding: @base-line-height*1 @base-font-size*2 @base-line-height*1;
     margin: @base-font-size/2 auto;
     position: relative;
+    overflow: hidden;
     box-shadow: 0 2px 2px -2px @c-grey;
     transition: box-shadow .2s ease-out;
+    //transition: all .2s ease-out;
     &:hover {
         box-shadow: 0 10px 10px -5px @c-grey;
     }
+    ul {
+        padding-left: @base-font-size;
+    }
+    /* &.is-hidden {
+        height: 0;
+        margin: 0;
+        opacity: 0;
+    } */
 }
-.articleCard-heading {
+.article-card-heading {
     margin-top: 0;
     margin-bottom: 0;
 }
-.articleCard-info {
+.article-card-info {
     margin-top: 0;
 }
-.articleCard-author, .articleCard-date {
+.article-card-author, .article-card-date {
     font-family: serif;
     font-style: italic;
 }
-.articleCard-intro {
+.article-card-intro {
     font-family: serif;
     p:last-of-type {
         margin-bottom: 0;
     }
 }
-.articleCard-tags {
+.article-card-tags {
     margin-top: .2em;
     font-style: italic;
     font-size: .8em;
 }
-.articleCard-Btn {
+.article-card-Btn {
     display: block;
     width: @base-font-size*2;
     height: @base-font-size*1.6;
@@ -185,12 +195,12 @@ main {
         color: @c-grey;
     }
 }
-.articlesContainer {
+.articles-container {
     .btn-pos(1);
 }
-.singleArticleContainer {
+.single-article-container {
     .btn-pos(2);
 }
-.articleCard-Btn-close:hover {
+.article-card-Btn-close:hover {
     color: @c-raspberry;
 }

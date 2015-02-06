@@ -1,5 +1,5 @@
 define(function(require){
-    var tArticlesList = require('src/templates/wrapped/tArticlesList');
+    var articlesListTpl = require('src/templates/wrapped/articles-list-tpl');
 
     var ArticlesListView = Backbone.View.extend({
 
@@ -14,20 +14,10 @@ define(function(require){
             this.listenTo(this.articlesCollection, 'success', this.updateArticlesList);
         },
 
-        template: _.template(tArticlesList, {variable: 'data'}),
-
-        render: function() {
-            var articlesToRender = _.filter(this.articlesCollection.models, function(model) {
-                return _.contains(this.curArticlesIds, model.id);
-            }, this);
-            this.$el.html(this.template({
-                articles: articlesToRender,
-                isTrash: false
-            }));
-        },
+        template: _.template(articlesListTpl, {variable: 'data'}),
 
         renderTrash: function() {
-            var articlesToRender = _.filter(this.articlesCollection.models, function(model) {
+            var articlesToRender = this.articlesCollection.filter(function(model) {
                 return _.contains(this.trashBinIds, model.id);
             }, this);
             this.$el.html(this.template({
@@ -37,7 +27,7 @@ define(function(require){
         },
 
         events: {
-            'click .articleCard-Btn--trash': 'removeToTrash'
+            'click .article-card-Btn-trash': 'removeToTrash'
         },
 
         setCurTag: function(tag) {
@@ -53,38 +43,71 @@ define(function(require){
                 tag = this.curTag;
             };
 
-            _.each(this.articlesCollection.models, function(article) {
+            this.articlesCollection.each(function(article) {
                 var tags = _.map(article.attributes.tags, function(el) {
                     return el.toLowerCase();
                 });
 
-                if (tag !== 'all') {
-                    if (_.contains(tags, tag) && !(_.contains(this.trashBinIds, article.id)) ) {
-                        this.curArticlesIds.push(article.id);
-                    }
-                } else {
-                    if ( !( _.contains(this.trashBinIds, article.id) )) {
-                        this.curArticlesIds.push(article.id);
-                    }
+                var isTagFits = _.contains(tags, tag),
+                    isNotInTrashAlready = !(_.contains(this.trashBinIds, article.id)),
+                    isArticleIdPushTo = (tag !== 'all') ? (isTagFits && isNotInTrashAlready) : (isNotInTrashAlready);
+
+                if (isArticleIdPushTo) {
+                    this.curArticlesIds.push(article.id);
                 }
+
             }, this);
 
             this.render();
         },
 
         removeToTrash: function(e) {
-            var removedId = $(e.target).parent().parent().data('id').toString();
+            var removedId = $(e.target).closest('.article-card').data('id').toString(),
+                removeAnimComplete = (function(isListToRender) {
+                    return (function() {
+                        this.articlesCollection.trigger('movedTrash');
+                        if (isListToRender) {
+                            this.render();
+                        } else {
+                            this.renderTrash();
+                        };
+                    }).bind(this);
+                }).bind(this),
+                hideArticle = function(e, isListToRender) {
+                    var articleCard = $(e.target).closest('.article-card');
+                    articleCard.animate({
+                        'margin-top': 0,
+                        'margin-bottom': 0,
+                        'height': 0,
+                        'opacity': 0
+                    },{
+                        duration: 200,
+                        easing: 'swing',
+                        complete: removeAnimComplete(isListToRender)
+                    });
+                };
+
             if ( !(_.contains(this.trashBinIds, removedId)) ) {
                 this.trashBinIds.push(removedId);
                 this.curArticlesIds = _.without(this.curArticlesIds, removedId);
                 this.articlesCollection.trigger('movedTrash');
-                this.render();
+                hideArticle(e, true);
             } else {
                 this.curArticlesIds.push(removedId);
                 this.trashBinIds.splice(this.trashBinIds.indexOf(removedId), 1);
                 this.articlesCollection.trigger('movedTrash');
-                this.renderTrash();
+                hideArticle(e, false);
             };
+        },
+
+        render: function() {
+            var articlesToRender = this.articlesCollection.filter(function(model) {
+                return _.contains(this.curArticlesIds, model.id);
+            }, this);
+            this.$el.html(this.template({
+                articles: articlesToRender,
+                isTrash: false
+            }));
         }
     });
 

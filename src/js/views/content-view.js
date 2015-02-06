@@ -9,27 +9,27 @@ define(function(require){
             this.router = opt.router;
 
             this.articlesListView = new ArticlesListView({
-                el: $('.articlesContainer'),
+                el: $('.articles-container'),
                 router: opt.router,
                 articlesCollection: opt.articlesCollection,
                 trashBinIds: opt.trashBinIds,
             });
             this.articleView = new ArticleView({
-                el: $('.singleArticleContainer'),
+                el: $('.single-article-container'),
                 router: opt.router,
                 articlesCollection: opt.articlesCollection,
                 trashBinIds: opt.trashBinIds,
                 article: {}
             });
 
-            this.listenTo(this.articlesCollection, 'success', function() {
-                this.listenTo(this.articlesCollection, 'add remove reset', function() {
-                    var routerState = this.router.current();
-                    if ( routerState.route === 'section' ) {
-                        this.renderCurrentState('section', routerState.params[0]);
-                    };
-                });
-            });
+            this.listenTo(this.articlesCollection, 'success add remove reset', this.articleCollEventHandler);
+        },
+
+        articleCollEventHandler: function() {
+            var routerState = this.router.current();
+            if ( routerState.route === 'section' ) {
+                this.renderCurrentState('section', routerState.params[0]);
+            };
         },
 
         showView: function(view) {

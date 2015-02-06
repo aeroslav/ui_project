@@ -1,6 +1,6 @@
 define(function(require){
-    var tSideTagsMenu = require('src/templates/wrapped/tSideTagsMenu'),
-        tSideStorageMenu = require('src/templates/wrapped/tSideStorageMenu');
+    var sideTagsMenuTpl = require('src/templates/wrapped/side-tags-menu-tpl'),
+        sideStorageMenu = require('src/templates/wrapped/side-storage-menu-tpl');
 
     var SideMenuView = Backbone.View.extend({
 
@@ -11,41 +11,20 @@ define(function(require){
             this.links = {};
             this.selectedSection = '';
 
-            this.listenTo(this.articlesCollection, 'success', function() {
-                this.updateLinks();
-            });
-            this.listenTo(this.articlesCollection, 'movedTrash', this.updateLinks);
+            this.listenTo(this.articlesCollection, 'success movedTrash add remove reset', this.updateLinks);
         },
 
-        templateTags: _.template(tSideTagsMenu, {variable: 'data'}),
-        templateStorage: _.template(tSideStorageMenu, {variable: 'data'}),
-
-        render: function() {
-            var curRoute = this.router.current(),
-                sortedLinks = _.sortBy(_.pairs(this.links), function(el) {
-                    return el[1];
-                }, this),
-                trashCounter = {},
-                curRoute = this.router.current();
-            trashCounter.trashCount = this.trashBinIds.length;
-            this.$el.html(this.templateTags( {menuLinks: sortedLinks.reverse() } ) + this.templateStorage(trashCounter));
-
-            switch (curRoute.route) {
-                case 'section':
-                    if (curRoute.params[0]) this.selectTag(curRoute.params[0]);
-                    break;
-                case 'storage':
-                    if (curRoute.params[0]) this.selectStorage('.menu-link--' + curRoute.params[0]);
-                    break;
-            }
-        },
+        templateTags: _.template(sideTagsMenuTpl, {variable: 'data'}),
+        templateStorage: _.template(sideStorageMenu, {variable: 'data'}),
 
         updateLinks: function() {
             this.links = {};
             this.links['All'] = 0;
-            _.each(this.articlesCollection.models, function(article) {
-                var tags = article.attributes.tags;
-                if ( !(_.contains(this.trashBinIds, article.id) )) {
+
+            this.articlesCollection.each(function(article) {
+                var tags = article.attributes.tags,
+                    isArticleNotInTrash = !( _.contains(this.trashBinIds, article.id) );
+                if (isArticleNotInTrash) {
                     _.each(tags, function(tag) {
                         if ( !(_.has(this.links, tag)) ) {
                             this.links[tag] = 1;
@@ -73,6 +52,27 @@ define(function(require){
         selectStorage: function(storageClass) {
             $('.menu-link').removeClass('is-current');
             $(storageClass).addClass('is-current');
+        },
+
+        render: function() {
+            var curRoute = this.router.current(),
+                sortedLinks = _.sortBy(_.pairs(this.links), function(el) {
+                    return el[1];
+                }, this),
+                trashCounter = {},
+                curRoute = this.router.current();
+            trashCounter.trashCount = this.trashBinIds.length;
+            this.$el.html(this.templateTags( {menuLinks: sortedLinks.reverse() } ) + this.templateStorage(trashCounter));
+
+            switch (curRoute.route) {
+                case 'section':
+                    if (curRoute.params[0]) this.selectTag(curRoute.params[0]);
+                    break;
+                case 'storage':
+                    var storageClass = '.menu-link-' + curRoute.params[0];
+                    if (curRoute.params[0]) this.selectStorage(storageClass);
+                    break;
+            }
         }
     });
 

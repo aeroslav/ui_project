@@ -387,51 +387,60 @@ main {
   color: #a3c644;
   transition: color, border-color 0.2s ease-out;
 }
-.articlesContainer,
-.singleArticleContainer {
+.articles-container,
+.single-article-container {
   height: 0;
   overflow: hidden;
 }
-.articlesContainer.is-visible,
-.singleArticleContainer.is-visible {
+.articles-container.is-visible,
+.single-article-container.is-visible {
   height: 100%;
   overflow-y: scroll;
 }
-.articleCard {
+.article-card {
   max-width: 900px;
   padding: 22px 32px 22px;
   margin: 8px auto;
   position: relative;
+  overflow: hidden;
   box-shadow: 0 2px 2px -2px #666666;
   transition: box-shadow 0.2s ease-out;
+  /* &.is-hidden {
+        height: 0;
+        margin: 0;
+        opacity: 0;
+    } */
 }
-.articleCard:hover {
+.article-card:hover {
   box-shadow: 0 10px 10px -5px #666666;
 }
-.articleCard-heading {
+.article-card ul {
+  padding-left: 16px;
+}
+.article-card-heading {
   margin-top: 0;
   margin-bottom: 0;
 }
-.articleCard-info {
+.article-card-info {
   margin-top: 0;
 }
-.articleCard-author,
-.articleCard-date {
+.article-card-author,
+.article-card-date {
   font-family: serif;
   font-style: italic;
 }
-.articleCard-intro {
+.article-card-intro {
   font-family: serif;
 }
-.articleCard-intro p:last-of-type {
+.article-card-intro p:last-of-type {
   margin-bottom: 0;
 }
-.articleCard-tags {
+.article-card-tags {
   margin-top: .2em;
   font-style: italic;
   font-size: .8em;
 }
-.articleCard-Btn {
+.article-card-Btn {
   display: block;
   width: 32px;
   height: 25.6px;
@@ -442,21 +451,21 @@ main {
   background-color: transparent;
   border: none;
 }
-.articleCard-Btn:hover {
+.article-card-Btn:hover {
   color: #39c2d7;
 }
-.articleCard-Btn:active {
+.article-card-Btn:active {
   color: #666666;
 }
-.articlesContainer .articleCard-Btn:nth-of-type(1) {
+.articles-container .article-card-Btn:nth-of-type(1) {
   right: 32px;
 }
-.singleArticleContainer .articleCard-Btn:nth-of-type(1) {
+.single-article-container .article-card-Btn:nth-of-type(1) {
   right: 32px;
 }
-.singleArticleContainer .articleCard-Btn:nth-of-type(2) {
+.single-article-container .article-card-Btn:nth-of-type(2) {
   right: 64px;
 }
-.articleCard-Btn-close:hover {
+.article-card-Btn-close:hover {
   color: #b22746;
 }
