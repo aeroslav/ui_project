@@ -11,7 +11,7 @@ define(function(require){
             'storage/:storage': 'storage',
         },
 
-        current : function() {
+        current : function() { // method to get current route, current history fragment and it params
             var Router = this,
                 fragment = Backbone.history.fragment,
                 routes = _.pairs(Router.routes),

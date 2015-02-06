@@ -316,6 +316,14 @@ main {
   position: relative;
   overflow: auto;
 }
+.cf:before,
+.cf:after {
+  content: "";
+  display: table;
+}
+.cf:after {
+  clear: both;
+}
 .wrapper {
   height: 100%;
 }
@@ -405,11 +413,6 @@ main {
   overflow: hidden;
   box-shadow: 0 2px 2px -2px #666666;
   transition: box-shadow 0.2s ease-out;
-  /* &.is-hidden {
-        height: 0;
-        margin: 0;
-        opacity: 0;
-    } */
 }
 .article-card:hover {
   box-shadow: 0 10px 10px -5px #666666;
@@ -420,6 +423,11 @@ main {
 .article-card-heading {
   margin-top: 0;
   margin-bottom: 0;
+  float: left;
+}
+.article-card-btns {
+  padding-top: 4px;
+  float: right;
 }
 .article-card-info {
   margin-top: 0;
@@ -441,11 +449,9 @@ main {
   font-size: .8em;
 }
 .article-card-Btn {
-  display: block;
+  display: inline-block;
   width: 32px;
   height: 25.6px;
-  position: absolute;
-  top: 44px;
   font-size: 1.1em;
   color: #a3c644;
   background-color: transparent;
@@ -459,12 +465,6 @@ main {
 }
 .articles-container .article-card-Btn:nth-of-type(1) {
   right: 32px;
-}
-.single-article-container .article-card-Btn:nth-of-type(1) {
-  right: 32px;
-}
-.single-article-container .article-card-Btn:nth-of-type(2) {
-  right: 64px;
 }
 .article-card-Btn-close:hover {
   color: #b22746;

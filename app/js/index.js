@@ -4974,11 +4974,6 @@ define('collections/articles-collection', [
     var ArticleModel = require('models/article-model');
     var ArticlesCollection = Backbone.Collection.extend({
         model: ArticleModel,
-        initialize: function () {
-            this.on('change', function () {
-                console.log('ArticlesCollection change');
-            });
-        },
         fetchUrl: function (url) {
             this.url = url;
             this.fetch({
@@ -5014,7 +5009,6 @@ define('views/sidemenu-view', [
             this.articlesCollection = opt.articlesCollection;
             this.trashBinIds = opt.trashBinIds;
             this.links = {};
-            this.selectedSection = '';
             this.listenTo(this.articlesCollection, 'success movedTrash add remove reset', this.updateLinks);
         },
         templateTags: _.template(sideTagsMenuTpl, { variable: 'data' }),
@@ -5050,6 +5044,9 @@ define('views/sidemenu-view', [
         },
         selectStorage: function (storageClass) {
             $('.menu-link').removeClass('is-current');
+            if (storageClass[0] !== '.') {
+                storageClass = '.' + storageClass;
+            }
             $(storageClass).addClass('is-current');
         },
         render: function () {
@@ -5096,7 +5093,7 @@ define('views/sidebar-view', [
     return SidebarView;
 });
 define('src/templates/wrapped/article-tpl', [], function () {
-    return '<% var rec = data.article.attributes; %>\r\n<article class="article-card" data-id="<%= data.article.id %>">\r\n    <header class="article-card-header">\r\n        <h1 class="article-card-heading"><%=rec.header%></h1>\r\n        <div class="article-card-btns">\r\n            <button class="article-card-Btn article-card-Btn-close icon-cross"></button>\r\n            <button class="article-card-Btn article-card-Btn-trash <%= (data.isTrash) ? \'icon-redo2\' : \'icon-bin2\' %>"></button>\r\n        </div>\r\n    </header>\r\n    <p class="article-card-info">\r\n        <span class="article-card-author"><%= rec.author %>,</span>\r\n        <span class="article-card-date"><%= rec.date %></span>\r\n    </p>\r\n    <div class="article-card-text"><%= rec.text %></div>\r\n    <div class="article-card-tags">\r\n        <% _.each(rec.tags, function(tag){ %>\r\n            <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n        <% }) %>\r\n    </div>\r\n</article>';
+    return '<% var rec = data.article.attributes; %>\r\n<article class="article-card" data-id="<%= data.article.id %>">\r\n    <header class="article-card-header cf">\r\n        <h1 class="article-card-heading"><%=rec.header%></h1>\r\n        <div class="article-card-btns">\r\n            <button class="article-card-Btn article-card-Btn-trash <%= (data.isTrash) ? \'icon-redo2\' : \'icon-bin2\' %>"></button>\r\n            <button class="article-card-Btn article-card-Btn-close icon-cross"></button>\r\n        </div>\r\n    </header>\r\n    <p class="article-card-info">\r\n        <span class="article-card-author"><%= rec.author %>,</span>\r\n        <span class="article-card-date"><%= rec.date %></span>\r\n    </p>\r\n    <div class="article-card-text"><%= rec.text %></div>\r\n    <div class="article-card-tags">\r\n        <% _.each(rec.tags, function(tag){ %>\r\n            <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n        <% }) %>\r\n    </div>\r\n</article>';
 });
 define('views/article-view', [
     'require',
@@ -5169,7 +5166,7 @@ define('views/article-view', [
     return ArticleView;
 });
 define('src/templates/wrapped/articles-list-tpl', [], function () {
-    return '<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article class="article-card" data-id="<%= el.id %>">\r\n        <h2 class="article-card-heading"><a href="#article/<%= el.id %>"><%= rec.header %></a></h2>\r\n        <p class="article-card-info">\r\n            <span class="article-card-author"><%= rec.author %>,</span>\r\n            <span class="article-card-date"><%= rec.date %></span>\r\n        </p>\r\n        <div class="article-card-intro"><%= rec.intro %></div>\r\n        <div class="article-card-tags">\r\n            <% _.each(rec.tags, function(tag){ %>\r\n                <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n            <% }) %>\r\n        </div>\r\n        <div class="article-card-btns">\r\n            <button class="article-card-Btn article-card-Btn-trash <%= (data.isTrash)?\'icon-redo2\':\'icon-bin2\' %>"></button>\r\n        </div>\r\n    </article>\r\n<% }) %>';
+    return '<% _.each(data.articles, function(el){\r\n    var rec = el.attributes; %>\r\n    <article class="article-card" data-id="<%= el.id %>">\r\n        <header class="article-card-header cf">\r\n            <h2 class="article-card-heading"><a href="#article/<%= el.id %>"><%= rec.header %></a></h2>\r\n            <div class="article-card-btns">\r\n                <button class="article-card-Btn article-card-Btn-trash <%= (data.isTrash)?\'icon-redo2\':\'icon-bin2\' %>"></button>\r\n            </div>\r\n        </header>\r\n        <p class="article-card-info">\r\n            <span class="article-card-author"><%= rec.author %>,</span>\r\n            <span class="article-card-date"><%= rec.date %></span>\r\n        </p>\r\n        <div class="article-card-intro"><%= rec.intro %></div>\r\n        <div class="article-card-tags">\r\n            <% _.each(rec.tags, function(tag){ %>\r\n                <a href="#section/<%= tag.toLowerCase() %>" class="tag-link"><%= tag %></a>&nbsp;\r\n            <% }) %>\r\n        </div>\r\n    </article>\r\n<% }) %>';
 });
 define('views/articlesList-view', [
     'require',
@@ -5187,16 +5184,7 @@ define('views/articlesList-view', [
             this.listenTo(this.articlesCollection, 'success', this.updateArticlesList);
         },
         template: _.template(articlesListTpl, { variable: 'data' }),
-        renderTrash: function () {
-            var articlesToRender = this.articlesCollection.filter(function (model) {
-                return _.contains(this.trashBinIds, model.id);
-            }, this);
-            this.$el.html(this.template({
-                articles: articlesToRender,
-                isTrash: true
-            }));
-        },
-        events: { 'click .article-card-Btn-trash': 'removeToTrash' },
+        events: { 'click .article-card-Btn-trash': 'moveToAndFromTrash' },
         setCurTag: function (tag) {
             this.curTag = tag;
             this.updateArticlesList();
@@ -5220,7 +5208,7 @@ define('views/articlesList-view', [
             }, this);
             this.render();
         },
-        removeToTrash: function (e) {
+        moveToAndFromTrash: function (e) {
             var removedId = $(e.target).closest('.article-card').data('id').toString(), removeAnimComplete = function (isListToRender) {
                     return function () {
                         this.articlesCollection.trigger('movedTrash');
@@ -5265,6 +5253,15 @@ define('views/articlesList-view', [
                 articles: articlesToRender,
                 isTrash: false
             }));
+        },
+        renderTrash: function () {
+            var articlesToRender = this.articlesCollection.filter(function (model) {
+                return _.contains(this.trashBinIds, model.id);
+            }, this);
+            this.$el.html(this.template({
+                articles: articlesToRender,
+                isTrash: true
+            }));
         }
     });
     return ArticlesListView;
@@ -5295,14 +5292,6 @@ define('views/content-view', [
                 trashBinIds: opt.trashBinIds,
                 article: {}
             });
-            this.listenTo(this.articlesCollection, 'success add remove reset', this.articleCollEventHandler);
-        },
-        articleCollEventHandler: function () {
-            var routerState = this.router.current();
-            if (routerState.route === 'section') {
-                this.renderCurrentState('section', routerState.params[0]);
-            }
-            ;
         },
         showView: function (view) {
             this.articlesListView.$el.removeClass('is-visible');
@@ -5369,7 +5358,6 @@ define('views/app-view', [
                 this.sidebarView.sideMenuView.selectStorage(storageClass);
                 break;
             default:
-                console.log('redirect to default route');
                 this.router.navigate('section/all', { trigger: true });
                 break;
             }

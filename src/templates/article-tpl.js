@@ -1,10 +1,10 @@
 <% var rec = data.article.attributes; %>
 <article class="article-card" data-id="<%= data.article.id %>">
-    <header class="article-card-header">
+    <header class="article-card-header cf">
         <h1 class="article-card-heading"><%=rec.header%></h1>
         <div class="article-card-btns">
-            <button class="article-card-Btn article-card-Btn-close icon-cross"></button>
             <button class="article-card-Btn article-card-Btn-trash <%= (data.isTrash) ? 'icon-redo2' : 'icon-bin2' %>"></button>
+            <button class="article-card-Btn article-card-Btn-close icon-cross"></button>
         </div>
     </header>
     <p class="article-card-info">

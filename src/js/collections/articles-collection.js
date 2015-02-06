@@ -1,17 +1,11 @@
 define(function(require){
     var ArticleModel = require('models/article-model');
 
-    var ArticlesCollection = Backbone.Collection.extend({
+    var ArticlesCollection = Backbone.Collection.extend({ 
 
             model: ArticleModel,
 
-            initialize: function() {
-                this.on('change', function() {
-                    console.log('ArticlesCollection change');
-                })
-            },
-
-            fetchUrl: function(url) {
+            fetchUrl: function(url) { // method to fetch json from url to collection
                 this.url = url;
                 this.fetch({
                     success: function(coll, res) {

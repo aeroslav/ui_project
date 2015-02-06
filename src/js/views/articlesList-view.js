@@ -3,39 +3,29 @@ define(function(require){
 
     var ArticlesListView = Backbone.View.extend({
 
-        initialize: function(opt) {
+        initialize: function(opt) { // accepting router, collection of articles and array of trash id from parent
             this.router = opt.router;
             this.articlesCollection = opt.articlesCollection;
             this.trashBinIds = opt.trashBinIds,
 
-            this.curTag = 'all';
-            this.curArticlesIds = [];
+            this.curTag = 'all'; // current tag to select articles from collection
+            this.curArticlesIds = []; // array of ids of articles to render
 
             this.listenTo(this.articlesCollection, 'success', this.updateArticlesList);
         },
 
         template: _.template(articlesListTpl, {variable: 'data'}),
 
-        renderTrash: function() {
-            var articlesToRender = this.articlesCollection.filter(function(model) {
-                return _.contains(this.trashBinIds, model.id);
-            }, this);
-            this.$el.html(this.template({
-                articles: articlesToRender,
-                isTrash: true
-            }));
-        },
-
         events: {
-            'click .article-card-Btn-trash': 'removeToTrash'
+            'click .article-card-Btn-trash': 'moveToAndFromTrash'
         },
 
-        setCurTag: function(tag) {
+        setCurTag: function(tag) { // set new tag and update list of articles
             this.curTag = tag;
             this.updateArticlesList();
         },
 
-        updateArticlesList: function(tag) {
+        updateArticlesList: function(tag) { // form new list of articles ids by tag and render it
             this.curArticlesIds = [];
             if (tag) {
                 this.curTag = tag.toLowerCase();
@@ -61,19 +51,19 @@ define(function(require){
             this.render();
         },
 
-        removeToTrash: function(e) {
+        moveToAndFromTrash: function(e) { // remove item from list to trash, or getting it back
             var removedId = $(e.target).closest('.article-card').data('id').toString(),
-                removeAnimComplete = (function(isListToRender) {
+                removeAnimComplete = (function(isListToRender) { // fn which executes after completing closing animation; binded to context
                     return (function() {
                         this.articlesCollection.trigger('movedTrash');
-                        if (isListToRender) {
+                        if (isListToRender) { // decide render list of articles or list of trash
                             this.render();
                         } else {
                             this.renderTrash();
                         };
                     }).bind(this);
                 }).bind(this),
-                hideArticle = function(e, isListToRender) {
+                hideArticle = function(e, isListToRender) { // fire animation of hiding article
                     var articleCard = $(e.target).closest('.article-card');
                     articleCard.animate({
                         'margin-top': 0,
@@ -107,6 +97,16 @@ define(function(require){
             this.$el.html(this.template({
                 articles: articlesToRender,
                 isTrash: false
+            }));
+        },
+
+        renderTrash: function() {
+            var articlesToRender = this.articlesCollection.filter(function(model) {
+                return _.contains(this.trashBinIds, model.id);
+            }, this);
+            this.$el.html(this.template({
+                articles: articlesToRender,
+                isTrash: true
             }));
         }
     });

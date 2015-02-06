@@ -2,7 +2,7 @@ define(function(require){
     var ArticleView = require('views/article-view'),
         ArticlesListView = require('views/articlesList-view');
 
-    var ContentView = Backbone.View.extend({
+    var ContentView = Backbone.View.extend({ // accepting and then passing router, collection of articles and array of trash id to children
         initialize: function(opt) {
             this.articlesCollection = opt.articlesCollection;
             this.trashBinIds = opt.trashBinIds;
@@ -21,18 +21,9 @@ define(function(require){
                 trashBinIds: opt.trashBinIds,
                 article: {}
             });
-
-            this.listenTo(this.articlesCollection, 'success add remove reset', this.articleCollEventHandler);
         },
 
-        articleCollEventHandler: function() {
-            var routerState = this.router.current();
-            if ( routerState.route === 'section' ) {
-                this.renderCurrentState('section', routerState.params[0]);
-            };
-        },
-
-        showView: function(view) {
+        showView: function(view) { // hiding all content views and then showing one
             this.articlesListView.$el.removeClass('is-visible');
             this.articleView.$el.removeClass('is-visible');
             view.$el.addClass('is-visible');

@@ -1,10 +1,9 @@
 define(function(require){
     var Backbone = require('backbone'),
         SideMenuView = require('views/sidemenu-view');
-        //sidebarTemplate = require('src/templates/wrapped/sidebar-tpl');
 
     var SidebarView = Backbone.View.extend({
-        initialize: function(opt) {
+        initialize: function(opt) { // accepting and then passing router, collection of articles and array of trash id to children
             this.articlesCollection = opt.articlesCollection;
             this.router = opt.router;
 

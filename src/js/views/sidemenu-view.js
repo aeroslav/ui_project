@@ -4,12 +4,11 @@ define(function(require){
 
     var SideMenuView = Backbone.View.extend({
 
-        initialize: function(opt) {
+        initialize: function(opt) { // accepting router, collection of articles and array of trash id from parent
             this.router = opt.router;
             this.articlesCollection = opt.articlesCollection;
             this.trashBinIds = opt.trashBinIds;
-            this.links = {};
-            this.selectedSection = '';
+            this.links = {}; // hash of records:'tag': 'number-of-articles-with-this-tag'
 
             this.listenTo(this.articlesCollection, 'success movedTrash add remove reset', this.updateLinks);
         },
@@ -17,7 +16,7 @@ define(function(require){
         templateTags: _.template(sideTagsMenuTpl, {variable: 'data'}),
         templateStorage: _.template(sideStorageMenu, {variable: 'data'}),
 
-        updateLinks: function() {
+        updateLinks: function() { // form list of tags, count numbers of articles with each tag and render it
             this.links = {};
             this.links['All'] = 0;
 
@@ -38,7 +37,7 @@ define(function(require){
             this.render();
         },
 
-        selectTag: function(tag) {
+        selectTag: function(tag) { // highlight tag in side menu by tag
             this.$('.menu-link').each(function(i, el) {
                 var elTag = $('.menu-link-tag', el);
 
@@ -49,22 +48,25 @@ define(function(require){
             });
         },
 
-        selectStorage: function(storageClass) {
+        selectStorage: function(storageClass) { // highlight section by class of menu item in side menu
             $('.menu-link').removeClass('is-current');
+            if (storageClass[0] !== '.') {
+                storageClass = '.' + storageClass;
+            }
             $(storageClass).addClass('is-current');
         },
 
         render: function() {
             var curRoute = this.router.current(),
-                sortedLinks = _.sortBy(_.pairs(this.links), function(el) {
+                sortedLinks = _.sortBy(_.pairs(this.links), function(el) { // sort tags in descending order
                     return el[1];
                 }, this),
                 trashCounter = {},
                 curRoute = this.router.current();
             trashCounter.trashCount = this.trashBinIds.length;
-            this.$el.html(this.templateTags( {menuLinks: sortedLinks.reverse() } ) + this.templateStorage(trashCounter));
+            this.$el.html( this.templateTags( {menuLinks: sortedLinks.reverse() } ) + this.templateStorage(trashCounter) );
 
-            switch (curRoute.route) {
+            switch (curRoute.route) { // highlight current menu link
                 case 'section':
                     if (curRoute.params[0]) this.selectTag(curRoute.params[0]);
                     break;

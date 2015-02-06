@@ -12,7 +12,7 @@ define(function(require){
         },
 
         initialize: function(opt) {
-            this.attributes.intro = opt.text.split('<hr>')[0];
+            this.attributes.intro = opt.text.split('<hr>')[0]; // cutting text for intro
         }
     });
 
